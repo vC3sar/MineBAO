@@ -1,219 +1,365 @@
 # 🚀 MC-BETA | AlwaysMC Launcher
 
-![Version](https://img.shields.io/badge/version-1.0.0--beta-orange)
-![Electron](https://img.shields.io/badge/Electron-v31%2B-47848F)
-![Node.js](https://img.shields.io/badge/Node.js-v16%2B-green)
-![Discord RPC](https://img.shields.io/badge/Discord-Rich%20Presence-7289DA)
-![Organization](https://img.shields.io/badge/Org-vazquezsg.ovh-blue)
-
-**AlwaysMC Launcher** es un launcher de Minecraft de escritorio hecho con **Electron**, pensado exclusivamente para cuentas **offline / no premium**. Con él puedes instalar versiones de Minecraft (Vanilla y Fabric), lanzar el juego en modo gráfico completo, conectar un bot automático mediante **Mineflayer** (modo NoGUI), y mostrar en tu perfil de Discord exactamente qué estás jugando gracias a **Discord Rich Presence**.
-
-No necesitas cuenta de Microsoft. No necesitas pagar nada. Solo instala, configura y juega.
+<p align="center">
+  <img src="https://img.shields.io/badge/version-1.1.0-orange?style=for-the-badge&logo=electron" alt="Version 1.1.0">
+  <img src="https://img.shields.io/badge/Electron-v31%2B-47848F?style=for-the-badge&logo=electron" alt="Electron">
+  <img src="https://img.shields.io/badge/Node.js-v18%2B-green?style=for-the-badge&logo=node.js" alt="Node.js">
+  <img src="https://img.shields.io/badge/Minecraft-Vanilla%20%7C%20Fabric-brightgreen?style=for-the-badge&logo=minecraft" alt="Minecraft">
+  <img src="https://img.shields.io/badge/Discord-Rich%20Presence-7289DA?style=for-the-badge&logo=discord" alt="Discord RPC">
+  <img src="https://img.shields.io/badge/Platform-Windows%20x64-0078D6?style=for-the-badge&logo=windows" alt="Windows x64">
+  <img src="https://img.shields.io/badge/License-ISC-blue?style=for-the-badge" alt="License ISC">
+</p>
 
 ---
 
-## ✨ ¿Qué puede hacer?
+**AlwaysMC Launcher (MC-BETA)** es un launcher de Minecraft de escritorio moderno, optimizado y multi-propósito desarrollado con **Electron**. Está diseñado específicamente para usuarios y entornos **offline / no premium**, ofreciendo una solución integral que va más allá de un simple lanzador:
 
-| Función | Descripción |
+1. **Launcher Java completo:** Descarga, verifica y ejecuta versiones oficiales **Vanilla** y perfiles **Fabric** con soporte de mods.
+2. **Modo NoGUI / Headless Bot:** Cliente automatizado impulsado por **Mineflayer** para mantener cuentas AFK, granjas automáticas o monitoreo de servidores sin consumir recursos gráficos de Minecraft.
+3. **Dashboard local en tiempo real:** Servidor WebSocket y panel web con métricas de salud, hambre, ping, posición 3D, chat coloreado y menús de inventario.
+4. **Discord Rich Presence:** Muestra en tu perfil de Discord en tiempo real qué versión estás jugando, servidor, modo y duración de tu sesión.
+
+---
+
+## 📑 Tabla de Contenidos
+
+- [✨ Características Principales](#-características-principales)
+- [📋 Requisitos del Sistema](#-requisitos-del-sistema)
+- [📥 Instalación y Ejecución](#-instalación-y-ejecución)
+- [📦 Compilación y Creación de Instaladores](#-compilación-y-creación-de-instaladores)
+- [💡 Ejemplos de Uso](#-ejemplos-de-uso)
+  - [1. Lanzar Minecraft en modo Jugador (GUI)](#1-lanzar-minecraft-en-modo-jugador-gui)
+  - [2. Modo Automatizado AFK / Bot (NoGUI)](#2-modo-automatizado-afk--bot-nogui)
+  - [3. Dashboard Web Local](#3-dashboard-web-local)
+- [⚙️ Guía de Configuración](#️-guía-de-configuración)
+  - [Configuración Global (`config.json`)](#configuración-global-configjson)
+  - [Configuración de Perfiles (`profiles.json`)](#configuración-de-perfiles-profilesjson)
+  - [Filtro de Chat (`config/ignore.json`)](#filtro-de-chat-configignorejson)
+- [🏗️ Arquitectura y Estructura del Código](#️-arquitectura-y-estructura-del-código)
+- [❓ Preguntas Frecuentes y Solución de Problemas](#-preguntas-frecuentes-y-solución-de-problemas)
+- [👥 Créditos y Licencia](#-créditos-y-licencia)
+
+---
+
+## ✨ Características Principales
+
+| Característica | Detalle |
 |---|---|
-| 🎮 **Launcher Java completo** | Descarga e instala versiones Vanilla y Fabric directamente desde los servidores oficiales de Mojang y FabricMC |
-| ☕ **Detección automática de Java** | Detecta las versiones de Java instaladas en tu sistema y elige la más compatible con la versión de Minecraft que quieras jugar |
-| 🤖 **Modo NoGUI (Bot)** | Conecta al servidor con un bot usando Mineflayer — ideal para servidores de granja o automatización |
-| 🖥️ **Dashboard web en vivo** | Panel web local con chat en tiempo real, estado del bot, ping, vida, hambre y posición |
-| 💬 **Discord Rich Presence** | Muestra en tu Discord qué versión estás jugando y en qué servidor estás |
-| 📁 **Perfiles guardados** | Recuerda tu última configuración (usuario, IP, versión) para que no tengas que escribirla cada vez |
-| 🎵 **Experiencia inmersiva** | Fondo de video cinemático y música ambiental en el menú principal |
+| 🎮 **Gestión de Versiones** | Descarga e instalación desatendida de versiones Vanilla y Fabric directo de los manifiestos oficiales de Mojang y FabricMC, con verificación de integridad SHA1 de librerías y assets. |
+| ☕ **Detección Inteligente de Java** | Analiza automáticamente los JDKs instalados en el sistema y selecciona la versión adecuada (Java 8, Java 17, Java 21) según los requisitos de cada versión de Minecraft. |
+| 🤖 **Modo Bot Headless (Mineflayer)** | Conexión directa a servidores en modo texto para dejar cuentas AFK sin abrir Minecraft. Incluye compatibilidad con proxies **Velocity** y **BungeeCord**. |
+| 🔄 **Auto-Reconexión Inteligente** | Reconexión automática con backoff exponencial, jitter y ventana de recuperación de autenticación para servidores inestables. |
+| 📊 **Dashboard y WebSocket en Vivo** | Servidor WebSocket local integrado (`ws://localhost:3000`) que expone estadísticas vitales (salud, comida, coordenadas, ping, inventario) y chat formateado. |
+| 💬 **Discord Rich Presence** | Integración nativa con Discord RPC mostrando estado, servidor, versión y marca de tiempo. |
+| 🎨 **UI Moderna e Inmersiva** | Interfaz con fondos de video cinemáticos dinámicos (1080p, 2K, 4K), música ambiental y navegación por teclado estilo consola. |
+| ⚡ **Perfiles de Rendimiento** | Asignación configurable de memoria RAM mínima y máxima (`-Xms`, `-Xmx`), argumentos de JVM optimizados e instancias dedicadas. |
 
 ---
 
-## 🛠️ Requisitos
+## 📋 Requisitos del Sistema
 
-Antes de empezar, asegúrate de tener instalado lo siguiente:
+### Para Desarrollo y Ejecución
+- **Sistema Operativo:** Windows 10 / 11 (64-bit).
+- **Node.js:** Versión `18.x` o superior (compatible con `v16.x` hasta `v22.x`). Se recomienda LTS.
+- **npm:** Versión `9.x` o superior (incluido con Node.js).
+- **Git:** Para clonar el repositorio.
 
-- **[Node.js](https://nodejs.org/) v16 o superior** — necesario para ejecutar el proyecto.
-- **[Java](https://adoptium.net/)** — necesario para lanzar Minecraft. El launcher detectará automáticamente las versiones que tengas instaladas y recomendará la más adecuada.
-- **Git** — para clonar el repositorio (opcional si descargas el ZIP directamente).
+### Para el Lanzamiento del Juego (Modo GUI)
+- **Java Runtime Environment (JRE) / JDK:**
+  - **Java 8 (1.8):** Minecraft 1.12.2 y anteriores.
+  - **Java 16 / 17:** Minecraft 1.17 hasta 1.20.4.
+  - **Java 21:** Minecraft 1.20.5 y versiones superiores (1.21+).
+  > [!TIP]
+  > Se recomienda descargar e instalar los runtimes de [Eclipse Adoptium (Temurin)](https://adoptium.net/). El launcher es capaz de autodetectar su ruta si están instalados en `Program Files\Eclipse Adoptium`.
 
 > [!NOTE]
-> Para el modo NoGUI (bot Mineflayer), no necesitas Java. Solo lo necesitas si vas a lanzar el cliente gráfico de Minecraft.
+> Para utilizar únicamente el **Modo NoGUI (Bot Mineflayer)** no necesitas Java instalado; corre íntegramente sobre Node.js.
 
 ---
 
-## ⚙️ Instalación
+## 📥 Instalación y Ejecución
 
-Sigue estos pasos para tener el launcher corriendo en tu máquina:
+Sigue estos pasos para clonar y ejecutar el launcher en entorno de desarrollo:
 
-**1. Clona el repositorio:**
+### 1. Clonar el Repositorio
 ```bash
-git clone https://github.com/vazquezsg-ovh/MC-BETA.git
-cd MC-BETA
+git clone https://github.com/vC3sar/AlwaysMC-Launcher.git
+cd AlwaysMC-Launcher
 ```
 
-**2. Instala las dependencias de Node.js:**
+### 2. Instalar Dependencias
 ```bash
 npm install
 ```
 
-**3. Configura tu Client ID de Discord** *(opcional, pero recomendado para activar Rich Presence)*:
-
-Abre el archivo `config.json` y pega tu Client ID de Discord:
+### 3. Configurar Parámetros Iniciales (Opcional)
+Edita `config.json` si deseas personalizar el `clientId` de Discord o asignar una ruta fija para tu ejecutable de Java:
 ```json
 {
-  "clientId": "TU_CLIENT_ID_AQUÍ"
+  "clientId": "1410394282841342055",
+  "launcher": {
+    "downloads": {
+      "minMemoryMb": 1024,
+      "maxMemoryMb": 4096
+    }
+  }
 }
 ```
 
-> [!TIP]
-> Puedes crear una aplicación en el [Portal de Desarrolladores de Discord](https://discord.com/developers/applications) para obtener tu Client ID. Si lo dejas vacío, el launcher funcionará igual pero sin actualizar tu estado en Discord.
-
-**4. ¡Listo! Arranca el launcher:**
+### 4. Iniciar en Modo Desarrollo
 ```bash
 npm start
 ```
-
----
-
-## 🚀 ¿Cómo funciona?
-
-Al abrir el launcher, encontrarás una interfaz con menú de navegación. Desde ahí puedes:
-
-### 🎮 Pestaña Play — Lanzar Minecraft
-1. Elige si quieres jugar con **Vanilla** (versión oficial sin mods) o **Fabric** (con soporte para mods).
-2. Selecciona la versión de Minecraft que quieres usar.
-3. Escribe tu **nombre de usuario offline** (puede ser cualquier nombre, no se valida con Mojang).
-4. Si es la primera vez que usas esa versión, el launcher la **descargará e instalará automáticamente** (librerías, assets, Java runtime).
-5. Pulsa **Play** — el juego abrirá como siempre.
-
-### 🤖 Modo Bot (NoGUI)
-1. Elige tu **nombre de usuario** e introduce la **IP del servidor**.
-2. El bot de Mineflayer se conectará al servidor sin abrir una ventana gráfica del juego.
-3. Abre el **Dashboard local** en tu navegador para ver el chat, los comandos y el estado de la sesión en tiempo real.
-
-### Flujo general de la app:
-```
-Abrir launcher → Cargar perfil guardado → Elegir modo (juego o bot)
-      ↓
-  Instalar versión si es necesario → Activar Discord RPC → Iniciar
+*O alternativamente:*
+```bash
+npm run dev
 ```
 
 ---
 
-## 📂 Estructura del Proyecto
+## 📦 Compilación y Creación de Instaladores
 
-Aquí tienes un mapa del proyecto para que sepas qué hace cada parte. Está organizado de forma modular para que sea fácil de mantener y ampliar.
+El proyecto utiliza **`electron-builder`** para empaquetar y generar ejecutables de distribución listos para producción.
 
-### 📄 Archivos en la raíz
+### Comandos de Compilación Disponibles
 
-| Archivo | ¿Para qué sirve? |
-|---|---|
-| `main.js` | Punto de entrada de Electron. Arranca la ventana principal y conecta todas las piezas. |
-| `preload.js` | Puente de seguridad entre la lógica de Node.js y la interfaz web del launcher. |
-| `minelight.js` | Servidor WebSocket local que transmite en tiempo real los eventos del bot al dashboard. |
-| `launcher.html` | La interfaz visual principal del launcher (lo que ves cuando abres la app). |
-| `app.html` | El panel de sesión activa, con chat, vitals y controles del bot. |
-| `index.html` | Dashboard web ligero, accesible desde el navegador durante una sesión NoGUI. |
-| `config.json` | Configuración global: Client ID de Discord, parámetros del launcher, preferencias avanzadas. |
-| `profiles.json` | Guarda automáticamente tu último perfil para no tener que reescribirlo. |
-| `package.json` | Metadatos y dependencias del proyecto Node.js. |
-| `mcbeta-context.md` | Snapshot comprimido de todo el código del repositorio, optimizado para trabajar con IAs. |
+| Comando | Acción | Salida |
+|---|---|---|
+| `npm run pack` | Empaqueta la app sin crear el instalador (para pruebas rápidas de build). | Directorio `dist/win-unpacked/` |
+| `npm run build` | Compila la aplicación según la configuración de `package.json`. | Directorio `dist/` |
+| `npm run build:win` | Genera el instalador estándar de Windows de 64 bits en formato NSIS (`.exe`). | `dist/mc-beta-1.1.0-win-x64.exe` |
 
-### 🛠️ `src/` — El cerebro del launcher
+### Pasos para compilar el instalador para Windows:
+1. Asegúrate de que las dependencias estén instaladas:
+   ```bash
+   npm install
+   ```
+2. Ejecuta la compilación de Windows:
+   ```bash
+   npm run build:win
+   ```
+3. Una vez finalizado el proceso, encontrarás el instalador en la carpeta `dist/`:
+   ```
+   dist/
+   ├── mc-beta-1.1.0-win-x64.exe     <-- Instalador distribuible NSIS
+   ├── builder-effective-config.yaml
+   └── win-unpacked/                 <-- Binarios descomprimidos ejecutables
+       └── mc-beta.exe
+   ```
 
-#### `src/game-launcher.js`
-El módulo más importante. Se encarga de **todo lo relacionado con instalar y lanzar Minecraft**:
-- Descarga el manifest oficial de Mojang y lista las versiones disponibles.
-- Descarga `client.jar`, librerías y assets con verificación SHA1.
-- Soporta instalación de perfiles Fabric (descarga el profile JSON de FabricMC y lo integra).
-- Construye los argumentos de la JVM y lanza el proceso de Java.
-- Gestiona múltiples instalaciones paralelas con cancelación de soporte.
-
-#### `src/game-launcher/`
-- **`constants.js`** — URLs de las APIs oficiales (Mojang, FabricMC, Forge).
-- **`version-java.js`** — Lógica para recomendar la versión correcta de Java según la versión de Minecraft (ej: Java 8 para 1.12, Java 17 para 1.18+, Java 21 para 1.21+).
-
-#### `src/main/`
-Módulos del **proceso principal de Electron**:
-- **`bot.js`** — Gestiona el ciclo de vida del bot: arrancar, detener y reconectar sesiones Mineflayer.
-- **`config.js`** — Carga, normaliza y guarda la configuración y los perfiles de usuario.
-- **`ipc.js`** — Maneja la comunicación entre la interfaz (Renderer) y la lógica del sistema (Main) vía IPC de Electron.
-- **`utils.js`** — Funciones auxiliares para parsear IPs, puertos y leer/escribir JSON de forma segura.
-- **`window.js`** — Crea y gestiona las ventanas del launcher.
-
-#### `src/bot/`
-Todo lo relacionado con la **integración de Mineflayer**:
-- **`bot-lifecycle.js`** — Eventos del bot: spawn, desconexión, errores y reintentos de reconexión.
-- **`chat.js`** — Normaliza y procesa los mensajes de chat del servidor, con soporte para texto con formato de Minecraft.
-- **`minecraft-text.js`** — Decodifica el formato de texto enriquecido de Minecraft (colores, estilos, componentes JSON).
-- **`minecraft-components.js`** — Extrae datos de ítems del juego (nombre, lore, componentes NBT modernos).
-- **`menu.js`** — Detecta e interactúa con inventarios y menús dentro del juego.
-- **`vitals.js`** — Monitorea la vida, el hambre, el ping y la posición del bot en tiempo real.
-- **`state.js`** — Objeto de estado centralizado de la sesión activa del bot.
-- **`ws-server.js`** — Configura el servidor WebSocket que conecta el bot con el dashboard.
-- **`launcher-config.js`** — Traduce la configuración del launcher al formato que necesita Mineflayer para conectarse.
-
-### 🎨 `js/` y `css/` — La interfaz
-
-#### `js/launcher/`
-Scripts que controlan la experiencia interactiva del launcher:
-- **`index.js`** — Inicializa el launcher y coordina todos los módulos.
-- **`navigation.js`** — Navegación por teclado (flechas, Enter, Escape) para una experiencia tipo consola.
-- **`catalog.js`** — Carga el catálogo de versiones (Vanilla, Fabric, Forge) con caché local de 6 horas.
-- **`runtime.js`** — Monitorea el progreso de instalación y el estado del juego en ejecución.
-- **`auth-ui.js`** — Controla qué formulario de autenticación mostrar según el modo elegido.
-- **`actions.js`** — Bindings de eventos: botones, clicks y formularios.
-- **`audio.js`** — Gestiona la reproducción y pausa de la música del menú.
-- **`background.js`** — Selecciona y reproduce el video de fondo según la resolución disponible.
-- **`status.js`** — Actualiza los indicadores de estado en la UI (instalación, juego, auth).
-
-#### `css/`
-Hojas de estilo modulares para el launcher y el panel web:
-- **`shared.css`** — Variables CSS globales (colores, tipografía, espaciados).
-- **`main/`** — Estilos del launcher: layout, botones, formularios, terminal de estado y modales de acción.
-- **`app.css`** / **`launcher.css`** — Activación de capas visuales según el contexto de la página.
-
-### 📁 Otros recursos
-
-| Carpeta / Archivo | Contenido |
-|---|---|
-| `fn/discord.js` | Módulo que gestiona la conexión con la API de Discord Rich Presence. |
-| `config/ignore.json` | Lista de palabras y mensajes que se filtran del terminal del bot para mantenerlo limpio. |
-| `mp3/` | Música ambiental del menú principal. |
-| `mp4/` | Videos cinemáticos de fondo en calidad estándar, 2K y 4K. |
+> [!NOTE]
+> El instalador generado cuenta con asistente de instalación NSIS que permite:
+> - Instalar sin permisos de administrador (modo por usuario).
+> - Elegir la ruta de instalación personalizada.
+> - Crear accesos directos en el Escritorio y Menú Inicio.
 
 ---
 
-## 🔐 Compatibilidad y limitaciones
+## 💡 Ejemplos de Uso
 
-Este proyecto está diseñado **únicamente para cuentas offline / no premium**. Esto significa:
+### 1. Lanzar Minecraft en modo Jugador (GUI)
 
-- ✅ Funciona con cualquier nombre de usuario sin verificación.
-- ✅ Puede conectarse a servidores en modo offline.
-- ❌ **No** implementa autenticación de Microsoft ni flujo OAuth.
-- ❌ **No** puede conectarse a servidores en modo online que requieran cuenta premium verificada.
+Este modo descarga los archivos de Minecraft oficiales, monta el entorno y ejecuta el juego:
 
-> [!IMPORTANT]
-> Si necesitas soporte para cuentas premium en el futuro, será necesario implementar el flujo de autenticación de Microsoft (MSAL) y gestionar los tokens de acceso de Mojang por separado. El código base ya incluye `@azure/msal-node` como dependencia preparada para esa eventual integración.
-
----
-
-## 📸 Identidad visual en Discord
-
-> [!TIP]
-> El launcher utiliza los siguientes assets de imagen registrados en Discord:
-> - **Logo Principal:** `logo` — Ícono de AlwaysMC.
-> - **Icono Secundario:** `mc` — Ícono clásico de Minecraft.
+1. Inicia el launcher (`npm start` o ejecuta `mc-beta.exe`).
+2. En la pantalla principal:
+   - Selecciona el motor de juego: **Vanilla** o **Fabric**.
+   - Elige la versión deseada en la lista desplegable (ejemplo: `1.21.1` o `1.20.4`).
+   - Ingresa tu **Nombre de usuario offline** (ej. `AlexGamer`).
+3. Haz clic en el botón **Play**:
+   - Si la versión no está instalada, el launcher descargará automáticamente el manifiesto, el `client.jar`, las librerías nativas y los assets desde los servidores de Mojang.
+   - Si seleccionaste Fabric, descargará el loader y configurará el perfil correspondiente.
+   - La barra de estado te informará del progreso en porcentaje (`Descargando librerías 45%...`).
+4. Minecraft abrirá con la memoria asignada y Discord mostrará tu actividad.
 
 ---
 
-## 👥 Créditos
+### 2. Modo Automatizado AFK / Bot (NoGUI)
 
-Este proyecto es mantenido y desarrollado por:
+Ideal para conectarte a tu servidor Survival, skyblock o granja sin abrir Minecraft:
 
-- **Developer:** vC3sar
-- **Organización:** [vazquezsg.ovh](https://vazquezsg.ovh)
+1. En el launcher, selecciona el modo **NoGUI (Bot)**.
+2. Ingresa los datos de conexión:
+   - **Usuario:** Nombre con el que entrará el bot (ej. `GranjaBot`).
+   - **IP del Servidor:** Dirección del servidor (ej. `mc.miservidor.com`).
+   - **Puerto:** Puerto del servidor (por defecto `25565`).
+   - **Versión:** Versión del protocolo de Minecraft (ej. `1.21.11`).
+3. Pulsa **Conectar**.
+4. La consola del launcher mostrará el proceso de autenticación e ingreso al mundo. Si el servidor se reinicia, el launcher reintentará la conexión automáticamente gracias a su algoritmo de reintento progresivo.
 
 ---
 
-## ⚖️ Licencia
+### 3. Dashboard Web Local
 
-Este proyecto está bajo la licencia **MIT**. Puedes usarlo, modificarlo y distribuirlo libremente siempre que conserves los créditos originales. Consulta el archivo `LICENSE` para más detalles.
+Durante una sesión en modo bot, el launcher levanta un servidor de telemetría:
+
+1. Abre tu navegador web en:
+   ```
+   http://localhost:3000
+   ```
+   *(o interactúa con la pestaña interna `app.html` del launcher)*
+2. Tendrás acceso a:
+   - **Chat en vivo:** Mensajes de jugadores con colores originales decodificados.
+   - **Barra de vida y hambre:** Monitoreo de supervivencia.
+   - **Posición X, Y, Z y Ping:** Coordenadas en tiempo real y latencia con el servidor.
+   - **Interacción con menús:** Capacidad de responder a menús tipo inventario (GUI/Chest menus) del servidor.
+
+---
+
+## ⚙️ Guía de Configuración
+
+### Configuración Global (`config.json`)
+
+El archivo [config.json](file:///c:/Users/vCesar/OneDrive/Escritorio/Proyectos/MC-BETA/config.json) contiene las preferencias de la aplicación y del motor de juego:
+
+```json
+{
+  "clientId": "1410394282841342055",
+  "launcher": {
+    "preferredVersions": [
+      "1.21.11"
+    ],
+    "velocityCompatMode": true,
+    "debugLifecycle": true,
+    "verboseMode": "all",
+    "reconnectDelayMs": 650,
+    "authRecoveryWindowMs": 30000,
+    "maxReconnectAttempts": 6,
+    "reconnectBackoffMaxMs": 4000,
+    "reconnectJitterRatio": 0.2,
+    "menuBackgroundMode": "auto",
+    "language": "es",
+    "catalogCache": {
+      "ttlMs": 21600000
+    },
+    "downloads": {
+      "minecraftDir": "",
+      "javaPath": "C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.8.9-hotspot\\bin\\javaw.exe",
+      "minMemoryMb": 1024,
+      "maxMemoryMb": 4096,
+      "extraJvmArgs": "-XX:+UseG1GC -XX:+ParallelRefProcEnabled",
+      "extraGameArgs": "",
+      "performanceProfileId": "fabric_performance_v1",
+      "instanceMode": "dedicated"
+    }
+  }
+}
+```
+
+#### Parámetros Clave:
+- **`clientId`**: ID de la aplicación de Discord para Rich Presence.
+- **`velocityCompatMode`**: Habilita compatibilidad con proxies Velocity/BungeeCord para evitar desconexiones de handshake.
+- **`downloads.javaPath`**: Ruta absoluta al ejecutable `javaw.exe` (dejar vacío para autodetección).
+- **`downloads.minMemoryMb` / `maxMemoryMb`**: RAM mínima y máxima en megabytes para la JVM de Minecraft (`-Xms` y `-Xmx`).
+- **`downloads.extraJvmArgs`**: Banderas adicionales para optimización de basura (GC) o argumentos personalizados.
+- **`reconnectDelayMs` / `maxReconnectAttempts`**: Control del sistema anti-desconexión del bot.
+
+---
+
+### Configuración de Perfiles (`profiles.json`)
+
+El archivo [profiles.json](file:///c:/Users/vCesar/OneDrive/Escritorio/Proyectos/MC-BETA/profiles.json) almacena la última sesión configurada para que no tengas que reescribir tus credenciales:
+
+```json
+{
+  "username": "TuNick",
+  "ip": "mc.servidor.com",
+  "port": 25565,
+  "version": "1.21.11",
+  "mode": "nogui"
+}
+```
+
+---
+
+### Filtro de Chat (`config/ignore.json`)
+
+Permite filtrar mensajes molestos o spam del servidor para mantener limpio el terminal del bot:
+
+```json
+{
+  "words": [
+    "bienvenido al servidor",
+    "vota con /vote",
+    "anuncio del servidor"
+  ]
+}
+```
+
+---
+
+## 🏗️ Arquitectura y Estructura del Código
+
+```
+MC-BETA/
+├── main.js                  # Proceso principal de Electron y ciclo de vida de la app
+├── preload.js               # ContextBridge seguro entre Node.js y Renderer
+├── minelight.js             # Módulo de orquestación de Mineflayer y servidor WebSocket
+├── config.json              # Configuración persistente del launcher y JVM
+├── profiles.json            # Último perfil de usuario / servidor guardado
+├── package.json             # Manifiesto npm, dependencias y configuración de compilación
+│
+├── src/                     # Núcleo del sistema
+│   ├── game-launcher.js     # Gestor de instalación, descarga y ejecución de Minecraft
+│   ├── game-launcher/       # Constantes de APIs (Mojang/Fabric) y resolución de Java
+│   │   ├── constants.js
+│   │   └── version-java.js
+│   ├── main/                # Lógica del proceso principal de Electron
+│   │   ├── bot.js           # Gestión de sesiones del bot Mineflayer
+│   │   ├── config.js        # Carga, fusión de valores por defecto y guardado
+│   │   ├── ipc.js           # Enrutamiento de llamadas IPC Renderer <-> Main
+│   │   ├── utils.js         # Utilidades de red, parsing y validación
+│   │   └── window.js        # Creación y configuración de BrowserWindow
+│   └── bot/                 # Componentes del bot Mineflayer
+│       ├── bot-lifecycle.js # Manejo de spawn, desconexión y auto-reconexión
+│       ├── chat.js          # Procesamiento y desinfección de mensajes del chat
+│       ├── vitals.js        # Extracción de vida, hambre, ping y coordenadas
+│       ├── menu.js          # Control de inventarios interactivos del juego
+│       └── ws-server.js     # Servidor de WebSocket para telemetría
+│
+├── js/                      # Scripts de la interfaz de usuario (Renderer)
+│   └── launcher/            # Navegación por teclado, catálogo, audio y acciones
+│
+├── css/                     # Estilos modulares del launcher
+│   ├── shared.css           # Variables de diseño, fuentes y paletas de color
+│   └── main/                # Formularios, botones, modales y vista de estado
+│
+├── fn/                      # Módulos auxiliares
+│   └── discord.js           # Integración con la librería discord-rpc
+│
+├── mp3/ & mp4/              # Assets multimedia (música ambiental y videos de fondo)
+└── dist/                    # Directorio de salida de compilaciones (instaladores .exe)
+```
+
+---
+
+## ❓ Preguntas Frecuentes y Solución de Problemas
+
+### 1. El juego no inicia y marca error relacionado con Java
+- **Causa:** La versión de Minecraft seleccionada requiere un JDK diferente al que tienes instalado por defecto en el `PATH` del sistema.
+- **Solución:** Instala la versión de Java requerida (por ejemplo [Temurin 21](https://adoptium.net/) para Minecraft 1.20.5+ o [Temurin 17](https://adoptium.net/) para 1.18-1.20.4) y verifica que la opción de autodetectar en `config.json` esté activa o ingresa la ruta completa a `javaw.exe` en `"downloads.javaPath"`.
+
+### 2. No aparece el estado en Discord (Rich Presence)
+- **Causa:** Discord no está abierto o el Client ID configurado no tiene los assets registrados.
+- **Solución:**
+  1. Abre Discord antes de iniciar el launcher.
+  2. Verifica que en `config.json` el campo `clientId` tenga un ID válido.
+  3. Si creas tu propia Discord App, asegúrate de registrar los assets con los nombres `logo` y `mc`.
+
+### 3. El bot se desconecta con "Client timed out" o error de handshake
+- **Causa:** Servidores que usan Velocity o BungeeCord pueden cerrar la conexión si el protocolo de compresión no coincide.
+- **Solución:** Mantén activado `"velocityCompatMode": true` en `config.json`. Esto ajusta las ventanas de espera y el manejo de paquetes del handshake inicial.
+
+### 4. ¿Puedo jugar en servidores premium oficiales (ej. Hypixel)?
+- **No.** MC-BETA está diseñado exclusivamente para el modo **offline / no premium**. Los servidores que exigen autenticación criptográfica con servidores de Microsoft rechazarán la conexión.
+
+---
+
+## 👥 Créditos y Licencia
+
+Desarrollado y mantenido por:
+- **Autor:** [vC3sar](https://github.com/vC3sar)
+- **Organización / Dominio:** [vazquezsg.ovh](https://vazquezsg.ovh)
+- **Repositorio:** [AlwaysMC-Launcher en GitHub](https://github.com/vC3sar/AlwaysMC-Launcher)
+
+Este proyecto se distribuye bajo la licencia **ISC**. Eres libre de usarlo, estudiarlo y adaptarlo citando la autoría original.
