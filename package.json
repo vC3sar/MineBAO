@@ -8,6 +8,7 @@
     "pack": "electron-builder --dir",
     "build": "electron-builder",
     "build:win": "electron-builder --win nsis",
+    "icons:update": "node scripts/download-mc-icons.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
