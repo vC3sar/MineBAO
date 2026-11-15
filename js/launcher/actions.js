@@ -127,6 +127,22 @@
       bindClick("server-modal-save-btn", () => ctx.saveServerModalForm?.());
       bindClick("server-modal-toggle-pass", () => ctx.toggleServerModalPassword?.());
 
+      const sModal = document.getElementById("server-modal");
+      if (sModal) {
+        bindEvent(sModal, "click", (e) => {
+          if (e.target === sModal) ctx.closeServerModal?.();
+        });
+      }
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          const m = document.getElementById("server-modal");
+          if (m && !m.classList.contains("hidden")) {
+            ctx.closeServerModal?.();
+          }
+        }
+      });
+
       if (ctx.dom.playTabBotBtn) bindEvent(ctx.dom.playTabBotBtn, "click", () => ctx.switchPlayTab("bot"));
       if (ctx.dom.playTabJavaBtn) bindEvent(ctx.dom.playTabJavaBtn, "click", async () => { ctx.switchPlayTab("java"); await ctx.ensureJavaCatalogLoadedOnce(); });
       if (ctx.dom.gameDistributionSelect) bindEvent(ctx.dom.gameDistributionSelect, "change", async () => { ctx.updateFilterVisibilityByDistribution(); ctx.refreshVersionSelect(); await ctx.loadGameCatalog(true); });

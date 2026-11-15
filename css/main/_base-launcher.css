@@ -1170,6 +1170,13 @@ body::-webkit-scrollbar-corner,
     box-sizing: border-box;
 }
 
+.bao-modal-backdrop.hidden,
+.bao-modal-backdrop[hidden],
+.hidden,
+[hidden] {
+    display: none !important;
+}
+
 .bao-modal-card {
     width: min(520px, 94vw);
     background: var(--bao-surface-modal);

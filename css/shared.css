@@ -38,6 +38,12 @@
   --mc-bg-2: #08080b;
 }
 
+/* Universal Utility Classes */
+.hidden,
+[hidden] {
+  display: none !important;
+}
+
 /* Accessibility: Universal Focus Ring (WCAG AA) */
 :focus-visible {
   outline: 2px solid var(--bao-emerald) !important;
