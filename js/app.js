@@ -51,7 +51,9 @@ const reconnectAttempt = reconnectPanel?.querySelector(".reconnect-attempt");
 const menuPanel = $("menu-panel");
 const menuTitle = $("menu-title");
 const menuMeta = $("menu-meta");
+const menuTypeBadge = $("menu-type-badge");
 const menuSearch = $("menu-search");
+const menuSearchClear = $("menu-search-clear");
 const menuBaseFilters = $("menu-base-filters");
 const menuResults = $("menu-results");
 const menuGrid = $("menu-grid");
@@ -70,6 +72,7 @@ const actionModalCloseBtn = $("action-modal-close-btn");
 const actionBtnLeft = $("action-btn-left");
 const actionBtnRight = $("action-btn-right");
 const actionBtnUse = $("action-btn-use");
+const actionBtnDrop = $("action-btn-drop");
 
 let socketReconnectAttempt = 0;
 let onActionSelected = null;
@@ -232,22 +235,106 @@ function setBotStatus(status) {
   }
 }
 
+// ── Minecraft Text Formatting ──────────────────────────────────────────────────
+const MC_COLOR_CODES = {
+  "0": "mc-c-0", "1": "mc-c-1", "2": "mc-c-2", "3": "mc-c-3",
+  "4": "mc-c-4", "5": "mc-c-5", "6": "mc-c-6", "7": "mc-c-7",
+  "8": "mc-c-8", "9": "mc-c-9", "a": "mc-c-a", "b": "mc-c-b",
+  "c": "mc-c-c", "d": "mc-c-d", "e": "mc-c-e", "f": "mc-c-f",
+};
+
+const MC_STYLE_CODES = {
+  "l": "mc-bold", "m": "mc-strike", "n": "mc-underline", "o": "mc-italic",
+};
+
+function escapeHTML(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function renderMinecraftFormattedHTML(text) {
+  if (!text) return "";
+  const sanitized = sanitizeVisibleText(String(text));
+  const tokens = sanitized.split(/(?:§|&)([0-9a-fk-or])/gi);
+  if (tokens.length === 1) return escapeHTML(tokens[0]);
+
+  let currentColor = null;
+  const currentStyles = new Set();
+  let html = "";
+
+  for (let i = 0; i < tokens.length; i++) {
+    if (i % 2 === 1) {
+      const code = tokens[i].toLowerCase();
+      if (code === "r") {
+        currentColor = null;
+        currentStyles.clear();
+      } else if (MC_COLOR_CODES[code]) {
+        currentColor = MC_COLOR_CODES[code];
+        currentStyles.clear();
+      } else if (MC_STYLE_CODES[code]) {
+        currentStyles.add(MC_STYLE_CODES[code]);
+      }
+    } else {
+      const piece = tokens[i];
+      if (!piece) continue;
+      const classes = [];
+      if (currentColor) classes.push(currentColor);
+      for (const st of currentStyles) classes.push(st);
+
+      if (classes.length) {
+        html += `<span class="${classes.join(" ")}">${escapeHTML(piece)}</span>`;
+      } else {
+        html += escapeHTML(piece);
+      }
+    }
+  }
+  return html;
+}
+
 // ── Menu ──────────────────────────────────────────────────────────────────────
 function clearMenu() {
   activeMenu = null;
   menuBusyState = false;
   menuPanel.classList.remove("visible", "busy");
+  if (menuTypeBadge) menuTypeBadge.textContent = "🎒 Inventario";
   menuTitle.textContent = t("app.menu.none");
   menuMeta.textContent = t("app.menu.noneDesc");
   menuResults.textContent = menuGrid.innerHTML = menuBaseFilters.innerHTML = "";
   menuEmpty.textContent = t("app.menu.empty");
   menuBusy.textContent = t("app.menu.busy");
   menuSearch.value = menuQuery = "";
+  if (menuSearchClear) menuSearchClear.classList.add("hidden");
 }
 
 const normalizeQueryText = (v) => String(v ?? "").trim().toLowerCase();
 const getBaseLabel = (item) => normalizeQueryText(item.name ?? "");
-const formatLore = (lore) => Array.isArray(lore) ? lore.map((l) => l.trim()).filter(Boolean).join("\n") : "";
+
+const FRIENDLY_NAMES = {
+  chest: "Cofre",
+  trapped_chest: "Cofre trampa",
+  torch: "Antorcha",
+  lime_dye: "Tinte lima",
+  green_dye: "Tinte verde",
+  player_head: "Cabeza",
+  compass: "Brújula",
+  clock: "Reloj",
+  nether_star: "Estrella",
+  diamond: "Diamante",
+  emerald: "Esmeralda",
+  barrier: "Barrera",
+  book: "Libro",
+  iron_sword: "Espada hierro",
+  diamond_sword: "Espada diamante",
+};
+
+function getFriendlyBaseName(baseName) {
+  const norm = normalizeQueryText(baseName);
+  return FRIENDLY_NAMES[norm] || baseName.replace(/_/g, " ");
+}
 
 function renderBaseFilters(items) {
   const counts = new Map();
@@ -259,19 +346,22 @@ function renderBaseFilters(items) {
   [...counts.entries()]
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .forEach(([baseName, count]) => {
-      const label = document.createElement("label");
-      label.className = "menu-base-filter";
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.checked = hiddenBaseNames.has(baseName);
-      checkbox.addEventListener("change", () => {
-        hiddenBaseNames[checkbox.checked ? "add" : "delete"](baseName);
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = `menu-filter-chip${hiddenBaseNames.has(baseName) ? " hidden-filter" : ""}`;
+      chip.title = hiddenBaseNames.has(baseName) ? "Mostrar este tipo de ítem" : "Ocultar este tipo de ítem";
+      chip.innerHTML = `<span>${escapeHTML(getFriendlyBaseName(baseName))}</span><span class="chip-count">${count}</span>`;
+      chip.addEventListener("click", () => {
+        if (hiddenBaseNames.has(baseName)) {
+          hiddenBaseNames.delete(baseName);
+          chip.classList.remove("hidden-filter");
+        } else {
+          hiddenBaseNames.add(baseName);
+          chip.classList.add("hidden-filter");
+        }
         applyMenuFilter();
       });
-      const text = document.createElement("span");
-      text.textContent = t("app.menu.hide", { name: baseName, count });
-      label.append(checkbox, text);
-      menuBaseFilters.appendChild(label);
+      menuBaseFilters.appendChild(chip);
     });
 }
 
@@ -280,8 +370,16 @@ function renderMenu(menu) {
   activeMenu = menu;
   menuPanel.classList.add("visible");
   menuPanel.classList.toggle("busy", menuBusyState);
-  menuTitle.textContent = menu.title || t("app.menu.serverMenu");
-  menuMeta.textContent = `Slots visibles: ${menu.slots.length}/${menu.slotCount ?? menu.slots.length} | Token: ${menu.token}`;
+
+  const isInventory = menu.windowId === "inventory" || String(menu.token || "").startsWith("personal-inventory");
+  if (menuTypeBadge) {
+    menuTypeBadge.textContent = isInventory ? "🎒 Hotbar / Bot" : "📦 Menú Servidor";
+  }
+
+  menuTitle.textContent = menu.title ? sanitizeVisibleText(menu.title) : (isInventory ? "Inventario del Bot" : t("app.menu.serverMenu"));
+  menuMeta.textContent = `Ranuras activas: ${menu.slots.length} • Clic directo o acciones rápidas`;
+  menuPanel.dataset.token = menu.token || "";
+
   renderBaseFilters(menu.slots);
   menuGrid.innerHTML = "";
   applyMenuFilter();
@@ -294,24 +392,86 @@ function parseMenuQuery(rawQuery) {
 function matchesMenuItem(item, filter) {
   if (hiddenBaseNames.has(getBaseLabel(item))) return false;
   if (!filter.includes.length) return true;
-  const hay = normalizeQueryText(item.searchText);
+  const hay = normalizeQueryText(`${item.searchText || ""} ${item.customName || ""} ${item.displayName || ""} ${item.name || ""}`);
   return filter.includes.every((t) => hay.includes(t));
 }
 
+function detectItemActionHint(item) {
+  const combined = `${item.customName ?? ""} ${item.displayName ?? ""} ${item.name ?? ""} ${Array.isArray(item.lore) ? item.lore.join(" ") : ""}`.toLowerCase();
+  if (combined.includes("clic derecho") || combined.includes("click derecho") || combined.includes("right click")) {
+    return "right";
+  }
+  if (combined.includes("clic izquierdo") || combined.includes("click izquierdo") || combined.includes("left click")) {
+    return "left";
+  }
+  return null;
+}
+
 const ICON_RULES = [
-  { match: ["player_head", "head"], icon: "👤", kind: "head" },
-  { match: ["sword"], icon: "⚔", kind: "utility" },
-  { match: ["bow", "crossbow"], icon: "🏹", kind: "utility" },
-  { match: ["barrier"], icon: "⛔", kind: "danger" },
-  { match: ["chest", "shulker_box"], icon: "🧰", kind: "utility" },
+  { match: ["player_head", "head", "skull"], icon: "👤", kind: "head" },
+  { match: ["sword", "blade", "dagger"], icon: "⚔️", kind: "combat" },
+  { match: ["bow", "crossbow", "arrow"], icon: "🏹", kind: "combat" },
+  { match: ["shield"], icon: "🛡️", kind: "combat" },
+  { match: ["barrier", "bedrock"], icon: "⛔", kind: "danger" },
+  { match: ["chest", "trapped_chest", "shulker_box", "barrel"], icon: "🧰", kind: "utility" },
   { match: ["compass"], icon: "🧭", kind: "utility" },
+  { match: ["torch", "lantern", "campfire", "redstone_torch"], icon: "🕯️", kind: "utility" },
+  { match: ["lime_dye", "green_dye", "dye", "glow_ink", "ink_sac"], icon: "🟢", kind: "magic" },
+  { match: ["clock"], icon: "⏰", kind: "utility" },
+  { match: ["book", "writable_book", "enchanted_book"], icon: "📖", kind: "utility" },
+  { match: ["nether_star", "star"], icon: "⭐", kind: "gold" },
+  { match: ["diamond", "emerald"], icon: "💎", kind: "emerald" },
+  { match: ["gold_ingot", "iron_ingot", "copper_ingot", "gold_nugget"], icon: "🪙", kind: "gold" },
+  { match: ["axe", "pickaxe", "shovel", "hoe"], icon: "⛏️", kind: "utility" },
+  { match: ["potion", "splash_potion", "lingering_potion", "experience_bottle"], icon: "🧪", kind: "magic" },
+  { match: ["firework_rocket", "firework_star"], icon: "🎆", kind: "food" },
+  { match: ["apple", "bread", "golden_apple", "beef", "cooked_beef", "steak", "carrot", "golden_carrot"], icon: "🍎", kind: "food" },
+  { match: ["elytra"], icon: "🪽", kind: "utility" },
+  { match: ["bell"], icon: "🔔", kind: "utility" },
+  { match: ["door", "trapdoor", "fence_gate"], icon: "🚪", kind: "utility" },
+  { match: ["bed"], icon: "🛏️", kind: "utility" },
+  { match: ["tnt", "flint_and_steel"], icon: "🧨", kind: "danger" },
+  { match: ["ender_pearl", "eye_of_ender"], icon: "🔮", kind: "magic" },
+  { match: ["totem_of_undying"], icon: "🧿", kind: "gold" },
 ];
 
 function getItemIcon(item) {
-  const hay = `${item.customName ?? ""} ${item.displayName ?? ""} ${item.name ?? ""}`.toLowerCase();
-  for (const rule of ICON_RULES) if (rule.match.some((t) => hay.includes(t))) return rule;
-  const firstChar = (item.customName || item.displayName || item.name || "?").trim()[0]?.toUpperCase() ?? "?";
-  return { icon: firstChar, kind: "block" };
+  const hay = `${item.name ?? ""} ${item.displayName ?? ""} ${item.customName ?? ""}`.toLowerCase();
+  for (const rule of ICON_RULES) {
+    if (rule.match.some((t) => hay.includes(t))) return rule;
+  }
+  return { icon: "📦", kind: "block" };
+}
+
+function executeMenuItemAction(item, clickType, cardElement = null) {
+  const snapshot = activeMenu;
+  if (!snapshot) return;
+
+  if (cardElement) {
+    cardElement.classList.add("busy-pulse");
+    setTimeout(() => cardElement?.classList.remove("busy-pulse"), 400);
+  }
+
+  if (snapshot.windowId !== "inventory" && !String(snapshot.token || "").startsWith("personal-inventory")) {
+    menuBusyState = true;
+    menuPanel.classList.add("busy");
+    menuBusy.textContent = t("app.menu.busy");
+  }
+
+  sendSocketMessage({ type: "menuAction", token: snapshot.token, slot: item.slot, clickType });
+
+  const rawName = item.customName || item.displayName || item.name || t("app.menu.element");
+  const cleanName = sanitizeVisibleText(rawName).replace(/\(Clic [^)]+\)/i, "").trim();
+
+  let actionLabel = "Clic Izquierdo";
+  if (clickType === "right") actionLabel = "Clic Derecho";
+  else if (clickType === "use") actionLabel = "Usar / Equipar";
+  else if (clickType === "drop") actionLabel = "Tirar ítem";
+
+  appendLine(`[MENU] ${actionLabel} en slot ${item.slot}: ${cleanName}`, "system");
+
+  const toastType = clickType === "drop" ? "info" : "success";
+  window.MCShared?.showToast(`${actionLabel} → ${cleanName} (Slot ${item.slot})`, toastType, 2200);
 }
 
 function applyMenuFilter() {
@@ -328,48 +488,98 @@ function applyMenuFilter() {
 
   const frag = document.createDocumentFragment();
   visible.forEach((item) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "menu-item";
-    button.innerHTML = `<div class="menu-item-icon" aria-hidden="true"></div><div class="menu-item-body"><span class="menu-item-slot">${t("app.menu.slot", { slot: item.slot })}</span><span class="menu-item-name"></span><span class="menu-item-count"></span><div class="menu-item-base"></div><div class="menu-item-lore"></div></div>`;
+    const card = document.createElement("div");
+    card.className = "menu-item";
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
 
+    const actionHint = detectItemActionHint(item);
+    const isHotbar = item.slot >= 36 && item.slot <= 44;
+    const defaultAction = actionHint || (isHotbar ? "right" : "left");
+
+    const rawTitle = item.customName || item.displayName || item.name || t("app.menu.element");
     const { icon, kind } = getItemIcon(item);
-    const iconBox = button.querySelector(".menu-item-icon");
-    iconBox.textContent = icon;
-    iconBox.dataset.kind = kind;
 
-    button.querySelector(".menu-item-name").textContent = item.customName || item.displayName || item.name || t("app.menu.element");
-    button.querySelector(".menu-item-count").textContent = item.count > 1 ? `x${item.count}` : "";
-    button.querySelector(".menu-item-base").textContent = item.customName && item.name && item.customName !== item.name ? t("app.menu.base", { name: item.name }) : "";
+    const slotTagHtml = `<div class="menu-item-slot-row">
+      <span class="menu-item-slot">Slot ${item.slot} ${isHotbar ? '<span class="menu-hotbar-tag">Hotbar</span>' : ''}</span>
+      ${actionHint ? `<span class="menu-action-badge ${actionHint}">🖱️ Clic ${actionHint === 'right' ? 'Derecho' : 'Izquierdo'}</span>` : ''}
+    </div>`;
 
-    const loreBox = button.querySelector(".menu-item-lore");
-    loreBox.textContent = formatLore(item.lore);
-    loreBox.style.whiteSpace = "pre-wrap";
+    const mainRowHtml = `<div class="menu-item-main-row">
+      <div class="menu-item-icon" aria-hidden="true" data-kind="${kind}">${icon}</div>
+      <div class="menu-item-title-col">
+        <div class="menu-item-name">${renderMinecraftFormattedHTML(rawTitle)}</div>
+        ${item.count > 1 ? `<span class="menu-item-count">x${item.count}</span>` : ''}
+        ${item.name && item.name !== rawTitle ? `<span class="menu-item-base">${escapeHTML(item.name)}</span>` : ''}
+      </div>
+    </div>`;
 
-    button.addEventListener("click", () => {
-      const snapshot = activeMenu;
-      if (!snapshot) return;
-      showActionModal(item, (clickType) => {
-        if (snapshot.windowId !== "inventory") {
-          menuBusyState = true;
-          menuPanel.classList.add("busy");
-          menuBusy.textContent = t("app.menu.busy");
-          button.disabled = true;
-        }
-        sendSocketMessage({ type: "menuAction", token: snapshot.token, slot: item.slot, clickType });
-        appendLine(`[MENU] Click ${clickType === "right" ? "derecho" : "izquierdo"} en slot ${item.slot}: ${item.displayName || item.name || t("app.menu.element")}`, "system");
-      });
+    let loreHtml = "";
+    if (Array.isArray(item.lore) && item.lore.length) {
+      const formattedLoreLines = item.lore
+        .map((l) => renderMinecraftFormattedHTML(l.trim()))
+        .filter(Boolean)
+        .join("<br>");
+      if (formattedLoreLines) {
+        loreHtml = `<div class="menu-item-lore">${formattedLoreLines}</div>`;
+      }
+    }
+
+    const actionsHtml = `<div class="menu-item-actions">
+      <button type="button" class="item-act-btn act-left ${defaultAction === 'left' ? 'act-primary' : ''}" title="Clic Izquierdo">🖱️ Izq</button>
+      <button type="button" class="item-act-btn act-right ${defaultAction === 'right' ? 'act-primary' : ''}" title="Clic Derecho">🖱️ Der</button>
+      <button type="button" class="item-act-btn act-use" title="Usar / Equipar en mano">⚡ Usar</button>
+      <button type="button" class="item-act-btn act-drop" title="Tirar ítem al suelo">🗑️ Tirar</button>
+      <button type="button" class="item-act-btn act-more" title="Opciones avanzadas">⚙️</button>
+    </div>`;
+
+    card.innerHTML = slotTagHtml + mainRowHtml + loreHtml + actionsHtml;
+
+    // Direct click on card executes recommended default
+    card.addEventListener("click", (e) => {
+      if (e.target.closest(".menu-item-actions")) return;
+      executeMenuItemAction(item, defaultAction, card);
     });
-    frag.appendChild(button);
+
+    // Native mouse right-click directly executes right-click
+    card.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      executeMenuItemAction(item, "right", card);
+    });
+
+    // Quick action buttons
+    card.querySelector(".act-left")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      executeMenuItemAction(item, "left", card);
+    });
+    card.querySelector(".act-right")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      executeMenuItemAction(item, "right", card);
+    });
+    card.querySelector(".act-use")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      executeMenuItemAction(item, "use", card);
+    });
+    card.querySelector(".act-drop")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      executeMenuItemAction(item, "drop", card);
+    });
+    card.querySelector(".act-more")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      showActionModal(item, (chosen) => executeMenuItemAction(item, chosen, card));
+    });
+
+    frag.appendChild(card);
   });
   menuGrid.appendChild(frag);
 }
 
 // ── Action modal ──────────────────────────────────────────────────────────────
 function showActionModal(item, callback) {
-  const name = item.displayName || item.name || t("app.modal.itemName");
-  actionModalTitle.textContent = item.displayName || item.name || t("app.modal.interact");
-  actionModalText.textContent = t("app.modal.clickQuestion", { name, slot: item.slot });
+  const rawName = item.displayName || item.name || t("app.modal.itemName");
+  const cleanName = sanitizeVisibleText(rawName).replace(/\(Clic [^)]+\)/i, "").trim();
+  actionModalTitle.textContent = cleanName;
+  actionModalText.textContent = `¿Qué acción deseas ejecutar con ${cleanName} (Slot ${item.slot})?`;
   onActionSelected = callback;
   actionModal.classList.add("visible");
   actionModal.setAttribute("aria-hidden", "false");
@@ -385,6 +595,7 @@ actionModalCloseBtn.addEventListener("click", hideActionModal);
 actionBtnLeft.addEventListener("click", () => { onActionSelected?.("left"); hideActionModal(); });
 actionBtnRight.addEventListener("click", () => { onActionSelected?.("right"); hideActionModal(); });
 actionBtnUse.addEventListener("click", () => { onActionSelected?.("use"); hideActionModal(); });
+actionBtnDrop?.addEventListener("click", () => { onActionSelected?.("drop"); hideActionModal(); });
 actionModal.addEventListener("click", (e) => { if (e.target === actionModal) hideActionModal(); });
 
 // ── WebSocket ─────────────────────────────────────────────────────────────────
@@ -465,7 +676,20 @@ function connectSocket() {
 }
 
 // ── Controls ──────────────────────────────────────────────────────────────────
-menuSearch.addEventListener("input", () => { menuQuery = menuSearch.value || ""; applyMenuFilter(); });
+menuSearch.addEventListener("input", () => {
+  menuQuery = menuSearch.value || "";
+  if (menuSearchClear) menuSearchClear.classList.toggle("hidden", !menuQuery);
+  applyMenuFilter();
+});
+
+if (menuSearchClear) {
+  menuSearchClear.addEventListener("click", () => {
+    menuSearch.value = menuQuery = "";
+    menuSearchClear.classList.add("hidden");
+    menuSearch.focus();
+    applyMenuFilter();
+  });
+}
 
 reconnectButton.addEventListener("click", () => {
   if (reconnectButton.disabled) return;

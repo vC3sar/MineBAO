@@ -1053,6 +1053,28 @@ module.exports = function (profile) {
             }
 
             try {
+              if (clickType === "drop") {
+                const item =
+                  bot.inventory.slots[slot] ||
+                  bot.inventory.items().find((i) => i.slot === slot);
+                if (item) {
+                  if (typeof bot.tossStack === "function") {
+                    bot.tossStack(item).catch((err) => {
+                      console.log("❌ Error tossing item stack:", err);
+                    });
+                  } else if (typeof bot.toss === "function") {
+                    bot.toss(item.type, null, item.count).catch((err) => {
+                      console.log("❌ Error tossing item:", err);
+                    });
+                  }
+                  setTimeout(
+                    () => sendInventorySnapshot(ws, personalInventoryToken),
+                    250,
+                  );
+                }
+                return;
+              }
+
               if (clickType === "use") {
                 const item =
                   bot.inventory.slots[slot] ||
@@ -1144,7 +1166,11 @@ module.exports = function (profile) {
           setTimeout(() => {
             try {
               if (bot.currentWindow) {
-                bot.clickWindow(slot, mouseButton, 0);
+                if (clickType === "drop") {
+                  bot.clickWindow(slot, 0, 4);
+                } else {
+                  bot.clickWindow(slot, mouseButton, 0);
+                }
               } else {
                 menuTransitionLocked = false;
                 setMenuTransitionLocked(false);

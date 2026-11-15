@@ -126,15 +126,21 @@
 
     <div id="menu-panel" aria-live="polite">
       <div id="menu-header">
-        <div>
-          <div id="menu-title" data-i18n="app.menu.none">Sin menú activo</div>
+        <div class="menu-header-info">
+          <div class="menu-header-title-row">
+            <span id="menu-type-badge" class="menu-type-badge">🎒 Inventario</span>
+            <div id="menu-title" data-i18n="app.menu.none">Sin menú activo</div>
+          </div>
           <div id="menu-meta" data-i18n="app.menu.noneDesc">Cuando el servidor abra un inventario, aparecerá aquí.</div>
         </div>
         <button id="menu-close-btn" type="button" class="menu-close-btn" data-i18n-aria-label="app.menu.closePanel" aria-label="Cerrar panel">✕</button>
       </div>
       <div id="menu-busy" data-i18n="app.menu.busy">Cambiando de servidor...</div>
-      <input id="menu-search" type="text" data-i18n-placeholder="app.menu.search" placeholder="Buscar por nombre o lore">
-      <div id="menu-base-filters"></div>
+      <div class="menu-search-wrap">
+        <input id="menu-search" type="text" data-i18n-placeholder="app.menu.search" placeholder="Buscar por nombre o lore">
+        <button type="button" id="menu-search-clear" class="menu-search-clear hidden" title="Limpiar búsqueda">✕</button>
+      </div>
+      <div id="menu-base-filters" class="menu-base-filters"></div>
       <div id="menu-results"></div>
       <div id="menu-grid"></div>
       <div id="menu-empty" class="menu-empty" data-i18n="app.menu.empty">Aún no hay opciones disponibles.</div>
@@ -148,10 +154,10 @@
       <div class="action-modal-body">
         <p id="action-modal-text" data-i18n="app.modal.question">¿Cómo quieres hacer clic en el objeto?</p>
         <div class="action-modal-buttons">
-          <button id="action-btn-left" type="button" class="action-btn left" data-i18n="app.action.left">Clic Izquierdo</button>
-          <button id="action-btn-right" type="button" class="action-btn right" data-i18n="app.action.right">Clic Derecho</button>
-          <button id="action-btn-use" type="button" class="action-btn use"
-            style="grid-column: span 2; margin-top: 4px;" data-i18n="app.action.use">⚡ Usar / Equipar en mano</button>
+          <button id="action-btn-left" type="button" class="action-btn left" data-i18n="app.action.left">🖱️ Clic Izquierdo</button>
+          <button id="action-btn-right" type="button" class="action-btn right" data-i18n="app.action.right">🖱️ Clic Derecho</button>
+          <button id="action-btn-use" type="button" class="action-btn use" data-i18n="app.action.use">⚡ Usar / Equipar en mano</button>
+          <button id="action-btn-drop" type="button" class="action-btn drop">🗑️ Tirar ítem al suelo</button>
         </div>
       </div>
     </div>

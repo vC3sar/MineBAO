@@ -93,7 +93,7 @@
     font-size: 13.5px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     border: 1px solid transparent;
     text-align: center;
 }
@@ -131,5 +131,17 @@
 .action-btn.use:hover {
     background: rgba(16, 185, 129, 0.25);
     border-color: rgba(16, 185, 129, 0.45);
+    transform: translateY(-1.5px);
+}
+
+.action-btn.drop {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #f87171;
+}
+
+.action-btn.drop:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: rgba(239, 68, 68, 0.45);
     transform: translateY(-1.5px);
 }
