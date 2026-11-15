@@ -565,8 +565,12 @@ function applyMenuFilter() {
       ${actionHint ? `<span class="menu-action-badge ${actionHint}">🖱️ Clic ${actionHint === 'right' ? 'Derecho' : 'Izquierdo'}</span>` : ''}
     </div>`;
 
+    const cleanItemName = normalizeQueryText(item.name || "");
     const mainRowHtml = `<div class="menu-item-main-row">
-      <div class="menu-item-icon" aria-hidden="true" data-kind="${kind}">${icon}</div>
+      <div class="menu-item-icon" aria-hidden="true" data-kind="${kind}">
+        <img class="menu-item-img" src="assets/mc-icons/${cleanItemName}.png" alt="" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-block';">
+        <span class="menu-item-fallback-icon" style="display:none;">${icon}</span>
+      </div>
       <div class="menu-item-title-col">
         <div class="menu-item-name">${renderMinecraftFormattedHTML(rawTitle)}</div>
         ${item.count > 1 ? `<span class="menu-item-count">x${item.count}</span>` : ''}

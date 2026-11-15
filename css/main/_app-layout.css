@@ -678,6 +678,21 @@
     border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
     flex-shrink: 0;
+    overflow: hidden;
+}
+
+.menu-item-img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
+    transition: transform 0.15s ease;
+}
+
+.menu-item:hover .menu-item-img {
+    transform: scale(1.1);
 }
 
 .menu-item-icon[data-kind="head"] {
