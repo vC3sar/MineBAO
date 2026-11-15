@@ -313,6 +313,20 @@ function clearMenu() {
 const normalizeQueryText = (v) => String(v ?? "").trim().toLowerCase();
 const getBaseLabel = (item) => normalizeQueryText(item.name ?? "");
 
+const userUnhiddenBaseNames = new Set();
+
+function isGlassPane(item) {
+  if (!item) return false;
+  const raw = `${item.name || ""} ${item.displayName || ""} ${item.customName || ""}`.toLowerCase();
+  return (
+    raw.includes("glass_pane") ||
+    raw.includes("glasspane") ||
+    raw.includes("glass pane") ||
+    raw.includes("panel de cristal") ||
+    raw.includes("panel de vidrio")
+  );
+}
+
 const FRIENDLY_NAMES = {
   chest: "Cofre",
   trapped_chest: "Cofre trampa",
@@ -333,6 +347,34 @@ const FRIENDLY_NAMES = {
 
 function getFriendlyBaseName(baseName) {
   const norm = normalizeQueryText(baseName);
+  if (norm.includes("glass_pane") || norm.includes("glasspane")) {
+    const color = norm
+      .replace("_stained_glass_pane", "")
+      .replace("_glass_pane", "")
+      .replace("stained_glass_pane", "")
+      .replace("glass_pane", "")
+      .trim();
+    const colorMap = {
+      black: "negro",
+      white: "blanco",
+      gray: "gris",
+      light_gray: "gris claro",
+      red: "rojo",
+      blue: "azul",
+      light_blue: "azul claro",
+      cyan: "cian",
+      purple: "morado",
+      magenta: "magenta",
+      pink: "rosa",
+      lime: "lima",
+      green: "verde",
+      yellow: "amarillo",
+      orange: "naranja",
+      brown: "marrón",
+    };
+    const translatedColor = colorMap[color] || color;
+    return translatedColor ? `Panel cristal ${translatedColor}` : "Panel de cristal";
+  }
   return FRIENDLY_NAMES[norm] || baseName.replace(/_/g, " ");
 }
 
@@ -348,16 +390,23 @@ function renderBaseFilters(items) {
     .forEach(([baseName, count]) => {
       const chip = document.createElement("button");
       chip.type = "button";
-      chip.className = `menu-filter-chip${hiddenBaseNames.has(baseName) ? " hidden-filter" : ""}`;
-      chip.title = hiddenBaseNames.has(baseName) ? "Mostrar este tipo de ítem" : "Ocultar este tipo de ítem";
-      chip.innerHTML = `<span>${escapeHTML(getFriendlyBaseName(baseName))}</span><span class="chip-count">${count}</span>`;
+      const isHidden = hiddenBaseNames.has(baseName);
+      chip.className = `menu-filter-chip${isHidden ? " hidden-filter" : ""}`;
+      chip.title = isHidden ? "Oculto por defecto (clic para mostrar)" : "Clic para ocultar este tipo de ítem";
+      chip.innerHTML = `<span>${isHidden ? "🚫 " : ""}${escapeHTML(getFriendlyBaseName(baseName))}</span><span class="chip-count">${count}</span>`;
       chip.addEventListener("click", () => {
         if (hiddenBaseNames.has(baseName)) {
           hiddenBaseNames.delete(baseName);
+          userUnhiddenBaseNames.add(baseName);
           chip.classList.remove("hidden-filter");
+          chip.querySelector("span").textContent = escapeHTML(getFriendlyBaseName(baseName));
+          chip.title = "Clic para ocultar este tipo de ítem";
         } else {
           hiddenBaseNames.add(baseName);
+          userUnhiddenBaseNames.delete(baseName);
           chip.classList.add("hidden-filter");
+          chip.querySelector("span").textContent = `🚫 ${getFriendlyBaseName(baseName)}`;
+          chip.title = "Oculto (clic para mostrar)";
         }
         applyMenuFilter();
       });
@@ -376,8 +425,18 @@ function renderMenu(menu) {
     menuTypeBadge.textContent = isInventory ? "🎒 Hotbar / Bot" : "📦 Menú Servidor";
   }
 
-  menuTitle.textContent = menu.title ? sanitizeVisibleText(menu.title) : (isInventory ? "Inventario del Bot" : t("app.menu.serverMenu"));
-  menuMeta.textContent = `Ranuras activas: ${menu.slots.length} • Clic directo o acciones rápidas`;
+  // Render formatted title with colors & styles (e.g. §f§lM§e§lL §0| §0Selector de modalidades)
+  menuTitle.innerHTML = menu.title ? renderMinecraftFormattedHTML(menu.title) : (isInventory ? "Inventario del Bot" : t("app.menu.serverMenu"));
+
+  // Default hide all glass panels (decorative fillers in server menus)
+  for (const item of menu.slots) {
+    const b = getBaseLabel(item);
+    if (isGlassPane(item) && !userUnhiddenBaseNames.has(b)) {
+      hiddenBaseNames.add(b);
+    }
+  }
+
+  menuMeta.textContent = `Ranuras totales: ${menu.slots.length} • Clic directo o acciones rápidas`;
   menuPanel.dataset.token = menu.token || "";
 
   renderBaseFilters(menu.slots);
@@ -413,6 +472,7 @@ const ICON_RULES = [
   { match: ["bow", "crossbow", "arrow"], icon: "🏹", kind: "combat" },
   { match: ["shield"], icon: "🛡️", kind: "combat" },
   { match: ["barrier", "bedrock"], icon: "⛔", kind: "danger" },
+  { match: ["glass_pane", "glasspane", "stained_glass"], icon: "🔲", kind: "block" },
   { match: ["chest", "trapped_chest", "shulker_box", "barrel"], icon: "🧰", kind: "utility" },
   { match: ["compass"], icon: "🧭", kind: "utility" },
   { match: ["torch", "lantern", "campfire", "redstone_torch"], icon: "🕯️", kind: "utility" },

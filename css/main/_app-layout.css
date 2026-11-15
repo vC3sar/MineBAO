@@ -824,7 +824,12 @@
 }
 
 /* Minecraft Text Formatting Colors */
-.mc-c-0 { color: #000000; }
+.mc-c-0 { color: #2d3748; }
+#menu-title .mc-c-0,
+.menu-item-name .mc-c-0,
+.menu-item-lore .mc-c-0 {
+    color: var(--bao-text-parchment, #f0d8b8);
+}
 .mc-c-1 { color: #0000aa; }
 .mc-c-2 { color: #00aa00; }
 .mc-c-3 { color: #00aaaa; }
