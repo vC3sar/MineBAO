@@ -88,7 +88,7 @@ function buildActivityPayload({ serverIp, version, username }) {
     state: `Jugando en: ${ver ? `${server} | ${ver}` : server}`,
     startTimestamp: new Date(),
     largeImageKey: "logo",
-    largeImageText: "MC-BETA",
+    largeImageText: "MineBAO (Bot Always Online)",
     smallImageKey: "mc",
     smallImageText: "Minecraft",
     instance: false,

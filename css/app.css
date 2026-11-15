@@ -1,2 +1,41 @@
 /* App-only styles (overrides/extensions) */
 body.app-page .launcher-overlay { display: none !important; }
+
+.sidebar-brand-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-brand-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(61, 220, 126, 0.28);
+  flex-shrink: 0;
+}
+
+.sidebar-brand-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-brand-title {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #f0d8b8;
+  line-height: 1.15;
+}
+
+.sidebar-brand-motto {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: #3ddc7e;
+  text-transform: uppercase;
+  margin-top: 2px;
+}

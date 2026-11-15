@@ -21,7 +21,7 @@ try {
     initialScope: {
       tags: {
         process: "main",
-        app_name: "mc-beta",
+        app_name: "minebao",
       },
     },
   });
@@ -78,7 +78,7 @@ app.whenReady().then(() => {
       level: "fatal",
     });
     dialog.showErrorBox(
-      "AlwaysMC Launcher - Startup Error",
+      "MineBAO - Startup Error",
       `La app no pudo iniciar.\n\n${message}`,
     );
     app.quit();

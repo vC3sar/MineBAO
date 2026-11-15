@@ -94,15 +94,15 @@ function setupIpcHandlers(gameLauncher) {
   // App & Window
   ipcMain.handle("launcher:getInfo", () => {
     return {
-      name: "MC-BETA",
+      name: "MineBAO",
       version: app.getVersion(),
       credits: [
-        "MC-BETA Launcher",
+        "MineBAO - Bot Always Online",
         "Mineflayer + Electron",
         "Optional Discord RPC",
       ],
       about:
-        "Offline/non-premium client for connecting a Minecraft bot to a local control panel. Uses persistent configuration in config.json and profiles in profiles.json.",
+        "Launcher de Minecraft offline/no premium con soporte para cliente gráfico (Vanilla/Fabric) y modo Bot Always Online (Mineflayer) con panel de control local en tiempo real.",
     };
   });
 

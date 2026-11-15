@@ -1,5 +1,5 @@
 {
-  "name": "mc-beta",
+  "name": "minebao",
   "version": "1.1.0",
   "main": "main.js",
   "scripts": {
@@ -10,10 +10,17 @@
     "build:win": "electron-builder --win nsis",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "minecraft",
+    "launcher",
+    "mineflayer",
+    "bot",
+    "always-online",
+    "minebao"
+  ],
+  "author": "vC3sar",
   "license": "ISC",
-  "description": "Offline/no premium Minecraft launcher with Mineflayer and Discord Rich Presence",
+  "description": "MineBAO (Bot Always Online) - Launcher de Minecraft offline/no premium con Mineflayer, dashboard en tiempo real y Discord Rich Presence",
   "dependencies": {
     "@azure/msal-node": "^3.8.1",
     "@sentry/electron": "^7.13.0",
@@ -32,8 +39,8 @@
     "electron-builder": "^24.13.3"
   },
   "build": {
-    "appId": "ovh.vazquezsg.mc-beta",
-    "productName": "mc-beta",
+    "appId": "ovh.vazquezsg.minebao",
+    "productName": "MineBAO",
     "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
     "directories": {
       "output": "dist"
@@ -50,6 +57,7 @@
     ],
     "asar": true,
     "win": {
+      "icon": "assets/logo/MineBAO.ico",
       "target": [
         {
           "target": "nsis",

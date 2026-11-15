@@ -1,7 +1,15 @@
-# 🚀 MC-BETA | AlwaysMC Launcher
+# 🚀 MineBAO | Bot Always Online
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.1.0-orange?style=for-the-badge&logo=electron" alt="Version 1.1.0">
+  <img src="assets/logo/MineBAO-icono-256-oscuro.png" alt="MineBAO Logo" width="130" height="130" style="border-radius: 24px; box-shadow: 0 8px 24px rgba(61, 220, 126, 0.35);">
+</p>
+
+<p align="center">
+  <b>B</b>ot &bull; <b>A</b>lways &bull; <b>O</b>nline
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/version-1.1.0-3DDC7E?style=for-the-badge&logo=electron" alt="Version 1.1.0">
   <img src="https://img.shields.io/badge/Electron-v31%2B-47848F?style=for-the-badge&logo=electron" alt="Electron">
   <img src="https://img.shields.io/badge/Node.js-v18%2B-green?style=for-the-badge&logo=node.js" alt="Node.js">
   <img src="https://img.shields.io/badge/Minecraft-Vanilla%20%7C%20Fabric-brightgreen?style=for-the-badge&logo=minecraft" alt="Minecraft">
@@ -12,18 +20,19 @@
 
 ---
 
-**AlwaysMC Launcher (MC-BETA)** es un launcher de Minecraft de escritorio moderno, optimizado y multi-propósito desarrollado con **Electron**. Está diseñado específicamente para usuarios y entornos **offline / no premium**, ofreciendo una solución integral que va más allá de un simple lanzador:
+**MineBAO** (**B**ot **A**lways **O**nline) es un launcher y gestor integral de Minecraft para escritorio desarrollado con **Electron**. Está diseñado pensando tanto en jugadores como en administradores y entusiastas de la automatización en entornos **offline / no premium**:
 
-1. **Launcher Java completo:** Descarga, verifica y ejecuta versiones oficiales **Vanilla** y perfiles **Fabric** con soporte de mods.
-2. **Modo NoGUI / Headless Bot:** Cliente automatizado impulsado por **Mineflayer** para mantener cuentas AFK, granjas automáticas o monitoreo de servidores sin consumir recursos gráficos de Minecraft.
-3. **Dashboard local en tiempo real:** Servidor WebSocket y panel web con métricas de salud, hambre, ping, posición 3D, chat coloreado y menús de inventario.
-4. **Discord Rich Presence:** Muestra en tu perfil de Discord en tiempo real qué versión estás jugando, servidor, modo y duración de tu sesión.
+1. **🎮 Launcher Java Completo:** Descarga, verifica y ejecuta versiones oficiales **Vanilla** y perfiles optimizados **Fabric** con soporte de mods sin necesidad de launchers pesados o cuentas Microsoft.
+2. **🤖 Modo NoGUI / Bot Always Online:** Cliente autónomo impulsado por **Mineflayer** concebido para mantener cuentas activas 24/7 (granjas AFK, cargadores de chunks, bots de soporte) sin consumir memoria gráfica ni abrir la ventana de Minecraft.
+3. **📊 Dashboard Web Local en Vivo:** Servidor WebSocket interno (`ws://localhost:3000`) y panel web con telemetría en tiempo real: salud, comida, ping, coordenadas 3D, chat con formato de colores original de Minecraft e interacción con menús de inventario.
+4. **💬 Discord Rich Presence:** Muestra en tu perfil de Discord en tiempo real qué versión estás jugando, en qué servidor te encuentras y el tiempo transcurrido.
 
 ---
 
 ## 📑 Tabla de Contenidos
 
 - [✨ Características Principales](#-características-principales)
+- [🎨 Identidad Visual y Logos](#-identidad-visual-y-logos)
 - [📋 Requisitos del Sistema](#-requisitos-del-sistema)
 - [📥 Instalación y Ejecución](#-instalación-y-ejecución)
 - [📦 Compilación y Creación de Instaladores](#-compilación-y-creación-de-instaladores)
@@ -47,12 +56,23 @@
 |---|---|
 | 🎮 **Gestión de Versiones** | Descarga e instalación desatendida de versiones Vanilla y Fabric directo de los manifiestos oficiales de Mojang y FabricMC, con verificación de integridad SHA1 de librerías y assets. |
 | ☕ **Detección Inteligente de Java** | Analiza automáticamente los JDKs instalados en el sistema y selecciona la versión adecuada (Java 8, Java 17, Java 21) según los requisitos de cada versión de Minecraft. |
-| 🤖 **Modo Bot Headless (Mineflayer)** | Conexión directa a servidores en modo texto para dejar cuentas AFK sin abrir Minecraft. Incluye compatibilidad con proxies **Velocity** y **BungeeCord**. |
+| 🤖 **Bot Always Online (Mineflayer)** | Conexión directa a servidores en modo texto para dejar cuentas AFK sin abrir Minecraft. Incluye compatibilidad avanzada con proxies **Velocity** y **BungeeCord**. |
 | 🔄 **Auto-Reconexión Inteligente** | Reconexión automática con backoff exponencial, jitter y ventana de recuperación de autenticación para servidores inestables. |
 | 📊 **Dashboard y WebSocket en Vivo** | Servidor WebSocket local integrado (`ws://localhost:3000`) que expone estadísticas vitales (salud, comida, coordenadas, ping, inventario) y chat formateado. |
-| 💬 **Discord Rich Presence** | Integración nativa con Discord RPC mostrando estado, servidor, versión y marca de tiempo. |
+| 💬 **Discord Rich Presence** | Integración nativa con Discord RPC mostrando estado, servidor, versión y marca de tiempo con identidad MineBAO. |
 | 🎨 **UI Moderna e Inmersiva** | Interfaz con fondos de video cinemáticos dinámicos (1080p, 2K, 4K), música ambiental y navegación por teclado estilo consola. |
 | ⚡ **Perfiles de Rendimiento** | Asignación configurable de memoria RAM mínima y máxima (`-Xms`, `-Xmx`), argumentos de JVM optimizados e instancias dedicadas. |
+
+---
+
+## 🎨 Identidad Visual y Logos
+
+El proyecto cuenta con identidad visual propia situada en `assets/logo/`:
+
+- **Icono Principal:** `MineBAO-icono-256-oscuro.png` / `.svg` (Bloque isométrico con tapa esmeralda `#3DDC7E` y base oscura `#0B0B0C`).
+- **Símbolo de Marca:** `MineBAO-simbolo-256-color.png` / `.svg`.
+- **Variantes Disponibles:** Versiones en claro, oscuro, blanco, negro y color para diversos contextos y fondos.
+- **Icono de Ejecutable:** `icon.ico` / `MineBAO.ico` (multi-resolución para instaladores y ventana de Windows).
 
 ---
 
@@ -73,7 +93,7 @@
   > Se recomienda descargar e instalar los runtimes de [Eclipse Adoptium (Temurin)](https://adoptium.net/). El launcher es capaz de autodetectar su ruta si están instalados en `Program Files\Eclipse Adoptium`.
 
 > [!NOTE]
-> Para utilizar únicamente el **Modo NoGUI (Bot Mineflayer)** no necesitas Java instalado; corre íntegramente sobre Node.js.
+> Para utilizar únicamente el **Modo NoGUI (Bot Always Online / Mineflayer)** no necesitas Java instalado; corre íntegramente sobre Node.js.
 
 ---
 
@@ -83,8 +103,8 @@ Sigue estos pasos para clonar y ejecutar el launcher en entorno de desarrollo:
 
 ### 1. Clonar el Repositorio
 ```bash
-git clone https://github.com/vC3sar/AlwaysMC-Launcher.git
-cd AlwaysMC-Launcher
+git clone https://github.com/vC3sar/MineBAO.git
+cd MineBAO
 ```
 
 ### 2. Instalar Dependencias
@@ -127,7 +147,7 @@ El proyecto utiliza **`electron-builder`** para empaquetar y generar ejecutables
 |---|---|---|
 | `npm run pack` | Empaqueta la app sin crear el instalador (para pruebas rápidas de build). | Directorio `dist/win-unpacked/` |
 | `npm run build` | Compila la aplicación según la configuración de `package.json`. | Directorio `dist/` |
-| `npm run build:win` | Genera el instalador estándar de Windows de 64 bits en formato NSIS (`.exe`). | `dist/mc-beta-1.1.0-win-x64.exe` |
+| `npm run build:win` | Genera el instalador estándar de Windows de 64 bits en formato NSIS (`.exe`). | `dist/MineBAO-1.1.0-win-x64.exe` |
 
 ### Pasos para compilar el instalador para Windows:
 1. Asegúrate de que las dependencias estén instaladas:
@@ -141,17 +161,17 @@ El proyecto utiliza **`electron-builder`** para empaquetar y generar ejecutables
 3. Una vez finalizado el proceso, encontrarás el instalador en la carpeta `dist/`:
    ```
    dist/
-   ├── mc-beta-1.1.0-win-x64.exe     <-- Instalador distribuible NSIS
+   ├── MineBAO-1.1.0-win-x64.exe     <-- Instalador distribuible NSIS
    ├── builder-effective-config.yaml
    └── win-unpacked/                 <-- Binarios descomprimidos ejecutables
-       └── mc-beta.exe
+       └── MineBAO.exe
    ```
 
 > [!NOTE]
 > El instalador generado cuenta con asistente de instalación NSIS que permite:
 > - Instalar sin permisos de administrador (modo por usuario).
 > - Elegir la ruta de instalación personalizada.
-> - Crear accesos directos en el Escritorio y Menú Inicio.
+> - Crear accesos directos en el Escritorio y Menú Inicio con el icono oficial de MineBAO.
 
 ---
 
@@ -161,7 +181,7 @@ El proyecto utiliza **`electron-builder`** para empaquetar y generar ejecutables
 
 Este modo descarga los archivos de Minecraft oficiales, monta el entorno y ejecuta el juego:
 
-1. Inicia el launcher (`npm start` o ejecuta `mc-beta.exe`).
+1. Inicia el launcher (`npm start` o ejecuta `MineBAO.exe`).
 2. En la pantalla principal:
    - Selecciona el motor de juego: **Vanilla** o **Fabric**.
    - Elige la versión deseada en la lista desplegable (ejemplo: `1.21.1` o `1.20.4`).
@@ -170,7 +190,7 @@ Este modo descarga los archivos de Minecraft oficiales, monta el entorno y ejecu
    - Si la versión no está instalada, el launcher descargará automáticamente el manifiesto, el `client.jar`, las librerías nativas y los assets desde los servidores de Mojang.
    - Si seleccionaste Fabric, descargará el loader y configurará el perfil correspondiente.
    - La barra de estado te informará del progreso en porcentaje (`Descargando librerías 45%...`).
-4. Minecraft abrirá con la memoria asignada y Discord mostrará tu actividad.
+4. Minecraft abrirá con la memoria asignada y Discord mostrará tu actividad con el estado de MineBAO.
 
 ---
 
@@ -178,20 +198,20 @@ Este modo descarga los archivos de Minecraft oficiales, monta el entorno y ejecu
 
 Ideal para conectarte a tu servidor Survival, skyblock o granja sin abrir Minecraft:
 
-1. En el launcher, selecciona el modo **NoGUI (Bot)**.
+1. En el launcher, selecciona el modo **Bot rápido (NoGUI)**.
 2. Ingresa los datos de conexión:
    - **Usuario:** Nombre con el que entrará el bot (ej. `GranjaBot`).
    - **IP del Servidor:** Dirección del servidor (ej. `mc.miservidor.com`).
    - **Puerto:** Puerto del servidor (por defecto `25565`).
    - **Versión:** Versión del protocolo de Minecraft (ej. `1.21.11`).
-3. Pulsa **Conectar**.
-4. La consola del launcher mostrará el proceso de autenticación e ingreso al mundo. Si el servidor se reinicia, el launcher reintentará la conexión automáticamente gracias a su algoritmo de reintento progresivo.
+3. Pulsa **Iniciar nueva partida**.
+4. La consola del launcher mostrará el proceso de autenticación e ingreso al mundo. Si el servidor se reinicia, el algoritmo de reconexión de MineBAO reintentará la conexión automáticamente.
 
 ---
 
 ### 3. Dashboard Web Local
 
-Durante una sesión en modo bot, el launcher levanta un servidor de telemetría:
+Durante una sesión en modo bot, MineBAO levanta un servidor de telemetría:
 
 1. Abre tu navegador web en:
    ```
@@ -251,7 +271,7 @@ El archivo [config.json](file:///c:/Users/vCesar/OneDrive/Escritorio/Proyectos/M
 - **`velocityCompatMode`**: Habilita compatibilidad con proxies Velocity/BungeeCord para evitar desconexiones de handshake.
 - **`downloads.javaPath`**: Ruta absoluta al ejecutable `javaw.exe` (dejar vacío para autodetección).
 - **`downloads.minMemoryMb` / `maxMemoryMb`**: RAM mínima y máxima en megabytes para la JVM de Minecraft (`-Xms` y `-Xmx`).
-- **`downloads.extraJvmArgs`**: Banderas adicionales para optimización de basura (GC) o argumentos personalizados.
+- **`downloads.extraJvmArgs`**: Banderas adicionales para optimización de recolección de basura (GC) o argumentos personalizados.
 - **`reconnectDelayMs` / `maxReconnectAttempts`**: Control del sistema anti-desconexión del bot.
 
 ---
@@ -291,7 +311,10 @@ Permite filtrar mensajes molestos o spam del servidor para mantener limpio el te
 ## 🏗️ Arquitectura y Estructura del Código
 
 ```
-MC-BETA/
+MineBAO/
+├── assets/                  # Identidad gráfica oficial
+│   └── logo/                # Logos e iconos en PNG, SVG e ICO
+├── icon.ico & icon.png      # Iconos de aplicación y binario ejecutable
 ├── main.js                  # Proceso principal de Electron y ciclo de vida de la app
 ├── preload.js               # ContextBridge seguro entre Node.js y Renderer
 ├── minelight.js             # Módulo de orquestación de Mineflayer y servidor WebSocket
@@ -309,7 +332,7 @@ MC-BETA/
 │   │   ├── config.js        # Carga, fusión de valores por defecto y guardado
 │   │   ├── ipc.js           # Enrutamiento de llamadas IPC Renderer <-> Main
 │   │   ├── utils.js         # Utilidades de red, parsing y validación
-│   │   └── window.js        # Creación y configuración de BrowserWindow
+│   │   └── window.js        # Creación y configuración de BrowserWindow con icono
 │   └── bot/                 # Componentes del bot Mineflayer
 │       ├── bot-lifecycle.js # Manejo de spawn, desconexión y auto-reconexión
 │       ├── chat.js          # Procesamiento y desinfección de mensajes del chat
@@ -318,14 +341,16 @@ MC-BETA/
 │       └── ws-server.js     # Servidor de WebSocket para telemetría
 │
 ├── js/                      # Scripts de la interfaz de usuario (Renderer)
+│   ├── shared/              # Diccionarios i18n y utilidades compartidas
 │   └── launcher/            # Navegación por teclado, catálogo, audio y acciones
 │
 ├── css/                     # Estilos modulares del launcher
 │   ├── shared.css           # Variables de diseño, fuentes y paletas de color
+│   ├── app.css              # Estilos del dashboard con badge MineBAO
 │   └── main/                # Formularios, botones, modales y vista de estado
 │
 ├── fn/                      # Módulos auxiliares
-│   └── discord.js           # Integración con la librería discord-rpc
+│   └── discord.js           # Integración con la librería discord-rpc (MineBAO RPC)
 │
 ├── mp3/ & mp4/              # Assets multimedia (música ambiental y videos de fondo)
 └── dist/                    # Directorio de salida de compilaciones (instaladores .exe)
@@ -351,7 +376,7 @@ MC-BETA/
 - **Solución:** Mantén activado `"velocityCompatMode": true` en `config.json`. Esto ajusta las ventanas de espera y el manejo de paquetes del handshake inicial.
 
 ### 4. ¿Puedo jugar en servidores premium oficiales (ej. Hypixel)?
-- **No.** MC-BETA está diseñado exclusivamente para el modo **offline / no premium**. Los servidores que exigen autenticación criptográfica con servidores de Microsoft rechazarán la conexión.
+- **No.** MineBAO está diseñado exclusivamente para el modo **offline / no premium**. Los servidores que exigen autenticación criptográfica con servidores de Microsoft rechazarán la conexión.
 
 ---
 
@@ -360,6 +385,6 @@ MC-BETA/
 Desarrollado y mantenido por:
 - **Autor:** [vC3sar](https://github.com/vC3sar)
 - **Organización / Dominio:** [vazquezsg.ovh](https://vazquezsg.ovh)
-- **Repositorio:** [AlwaysMC-Launcher en GitHub](https://github.com/vC3sar/AlwaysMC-Launcher)
+- **Repositorio:** [MineBAO en GitHub](https://github.com/vC3sar/MineBAO)
 
 Este proyecto se distribuye bajo la licencia **ISC**. Eres libre de usarlo, estudiarlo y adaptarlo citando la autoría original.

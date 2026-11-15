@@ -45,7 +45,7 @@ function httpsGetBuffer(url, timeoutMs = 30000) {
   return new Promise((resolve, reject) => {
     const req = https.get(
       url,
-      { timeout: timeoutMs, headers: { "User-Agent": "MC-BETA/1.0" } },
+      { timeout: timeoutMs, headers: { "User-Agent": "MineBAO/1.1" } },
       (res) => {
         if (
           res.statusCode >= 300 &&
@@ -142,7 +142,7 @@ async function httpsRequestJson(
         path: `${parsed.pathname}${parsed.search}`,
         method,
         timeout: timeoutMs,
-        headers: { "User-Agent": "MC-BETA/1.0", ...headers },
+        headers: { "User-Agent": "MineBAO/1.1", ...headers },
       },
       (res) => {
         const chunks = [];
@@ -233,7 +233,7 @@ async function downloadFileWithVerify(
       await new Promise((resolve, reject) => {
         const req = https.get(
           url,
-          { headers: { "User-Agent": "MC-BETA/1.0" } },
+          { headers: { "User-Agent": "MineBAO/1.1" } },
           (res) => {
             if (
               res.statusCode >= 300 &&
@@ -555,12 +555,14 @@ class GameLauncherService {
   }
 
   getAppRuntimeDir() {
-    return path.join(
-      process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"),
-      "MC-BETA",
-      "runtime",
-      "java",
-    );
+    const base =
+      process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming");
+    const newDir = path.join(base, "MineBAO", "runtime", "java");
+    const legacyDir = path.join(base, "MC-BETA", "runtime", "java");
+    if (!fs.existsSync(newDir) && fs.existsSync(legacyDir)) {
+      return legacyDir;
+    }
+    return newDir;
   }
 
   getManagedRuntimeFolderName(javaMajor) {
@@ -1743,8 +1745,8 @@ class GameLauncherService {
 
     const replacements = {
       natives_directory: nativesDir,
-      launcher_name: "MC-BETA",
-      launcher_version: "1.0.0",
+      launcher_name: "MineBAO",
+      launcher_version: "1.1.0",
       classpath: classpathEntries.join(path.delimiter),
       classpath_separator: path.delimiter,
       library_directory: librariesDir,

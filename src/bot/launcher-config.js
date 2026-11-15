@@ -21,11 +21,13 @@ function resolveBotRuntimeConfig(appConfig, requestedVersion) {
     velocityCompatMode: Boolean(launcherConfig.velocityCompatMode),
     verboseMode: String(launcherConfig.verboseMode || "app").toLowerCase() === "all" ? "all" : "app",
     debugLifecycleSetting:
-      process.env.MC_BETA_DEBUG !== undefined
-        ? process.env.MC_BETA_DEBUG
-        : launcherConfig.debugLifecycle !== undefined
-          ? String(launcherConfig.debugLifecycle)
-          : "1",
+      process.env.MINEBAO_DEBUG !== undefined
+        ? process.env.MINEBAO_DEBUG
+        : process.env.MC_BETA_DEBUG !== undefined
+          ? process.env.MC_BETA_DEBUG
+          : launcherConfig.debugLifecycle !== undefined
+            ? String(launcherConfig.debugLifecycle)
+            : "1",
     versionCandidates,
   };
 }

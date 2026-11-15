@@ -13,7 +13,13 @@ class WindowManager {
   }
 
   createWindow() {
+    const iconPath = path.join(
+      __dirname,
+      "../../assets/logo/MineBAO-icono-256-oscuro.png",
+    );
     const win = new BrowserWindow({
+      title: "MineBAO - Bot Always Online",
+      icon: iconPath,
       show: true,
       width: 1360,
       height: 860,
