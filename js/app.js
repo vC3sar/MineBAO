@@ -562,11 +562,10 @@ function applyMenuFilter() {
     card.className = "menu-item";
     card.tabIndex = 0;
     card.setAttribute("role", "button");
-    card.setAttribute("title", "Clic: Acción recomendada | Clic Der: Clic Derecho | Rueda: Usar | Q: Soltar");
+    card.setAttribute("title", "Clic Izq: Clic Izquierdo | Clic Der: Clic Derecho | Rueda: Usar | Tecla Q: Tirar");
 
     const actionHint = detectItemActionHint(item);
     const isHotbar = item.slot >= 36 && item.slot <= 44;
-    const defaultAction = actionHint || (isHotbar ? "right" : "left");
 
     const rawTitle = item.customName || item.displayName || item.name || t("app.menu.element");
     const { icon, kind } = getItemIcon(item);
@@ -601,19 +600,16 @@ function applyMenuFilter() {
     }
 
     const actionsHtml = `<div class="menu-item-actions">
-      <button type="button" class="item-act-btn act-left ${defaultAction === 'left' ? 'act-primary' : ''}" title="Clic Izquierdo">🖱️ Izq</button>
-      <button type="button" class="item-act-btn act-right ${defaultAction === 'right' ? 'act-primary' : ''}" title="Clic Derecho">🖱️ Der</button>
-      <button type="button" class="item-act-btn act-use" title="Usar / Equipar (o clic de rueda)">⚡ Usar</button>
-      <button type="button" class="item-act-btn act-drop" title="Tirar ítem (o presiona tecla Q)">🗑️ Tirar</button>
+      <button type="button" class="item-act-btn act-drop" title="Tirar ítem al suelo (o presiona tecla Q)">🗑️ Tirar (Q)</button>
       <button type="button" class="item-act-btn act-more" title="Opciones avanzadas">⚙️</button>
     </div>`;
 
     card.innerHTML = slotTagHtml + mainRowHtml + loreHtml + actionsHtml;
 
-    // Direct click on card executes recommended default
+    // Direct left click on card executes left click
     card.addEventListener("click", (e) => {
       if (e.target.closest(".menu-item-actions")) return;
-      executeMenuItemAction(item, defaultAction, card);
+      executeMenuItemAction(item, "left", card);
     });
 
     // Native mouse right-click directly executes right-click
@@ -646,18 +642,6 @@ function applyMenuFilter() {
     });
 
     // Quick action buttons
-    card.querySelector(".act-left")?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      executeMenuItemAction(item, "left", card);
-    });
-    card.querySelector(".act-right")?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      executeMenuItemAction(item, "right", card);
-    });
-    card.querySelector(".act-use")?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      executeMenuItemAction(item, "use", card);
-    });
     card.querySelector(".act-drop")?.addEventListener("click", (e) => {
       e.stopPropagation();
       executeMenuItemAction(item, "drop", card);
