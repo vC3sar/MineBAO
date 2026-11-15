@@ -11,7 +11,7 @@
     align-items: center;
     justify-content: center;
     z-index: 10000;
-    transition: opacity 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     opacity: 0;
 }
 
@@ -27,11 +27,13 @@
     padding: 22px;
     width: 90%;
     max-width: 380px;
+    max-height: min(88vh, 600px);
+    overflow-y: auto;
     box-shadow: 
         0 24px 60px rgba(0, 0, 0, 0.55),
         inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    transform: scale(0.9);
-    transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: scale(0.95);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .action-modal.visible .action-modal-content {
@@ -65,13 +67,17 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background 1s, color 1s, border-color 1s;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.15s ease;
 }
 
 .action-modal-close:hover {
     background: rgba(239, 68, 68, 0.15);
     border-color: rgba(239, 68, 68, 0.3);
     color: #ef4444;
+}
+
+.action-modal-close:active {
+    transform: scale(0.95);
 }
 
 .action-modal-body p {
@@ -93,9 +99,13 @@
     font-size: 13.5px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     border: 1px solid transparent;
     text-align: center;
+}
+
+.action-btn:active {
+    transform: scale(0.97);
 }
 
 .action-btn.left {
@@ -144,4 +154,10 @@
     background: rgba(239, 68, 68, 0.25);
     border-color: rgba(239, 68, 68, 0.45);
     transform: translateY(-1.5px);
+}
+
+@media (max-width: 420px) {
+    .action-modal-buttons {
+        grid-template-columns: 1fr;
+    }
 }

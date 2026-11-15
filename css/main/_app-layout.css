@@ -81,13 +81,18 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background 1s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 1s cubic-bezier(0.2, 0.8, 0.2, 1), color 1s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: background 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.15s ease;
 }
 
 .hud-end-session-btn:hover {
     background: rgba(239, 68, 68, 0.16);
     border-color: rgba(239, 68, 68, 0.4);
     color: #fecaca;
+    transform: translateY(-1px);
+}
+
+.hud-end-session-btn:active {
+    transform: scale(0.97);
 }
 
 .hud-end-session-btn:disabled {
@@ -313,7 +318,7 @@
     border-radius: 999px;
     background: #ef4444;
     box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
-    transition: background-color 1s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: background-color 0.25s ease, box-shadow 0.25s ease;
     transform: scale(1);
     transform-origin: center;
     will-change: transform, box-shadow;
@@ -467,12 +472,10 @@
 
 /* Visual Controls Guide banner above the menu */
 .menu-controls-guide {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 7px 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 6px;
+    padding: 7px 10px;
     background: rgba(15, 23, 42, 0.65);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 10px;
@@ -482,8 +485,12 @@
 .menu-guide-item {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     font-size: 11px;
+    padding: 3px 6px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .guide-badge {
@@ -634,6 +641,8 @@
 .menu-item {
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+    min-height: 110px;
     gap: 8px;
     border: 1px solid var(--bao-border-subtle, rgba(255, 255, 255, 0.08));
     background: var(--bao-surface-card, rgba(18, 18, 24, 0.8));
@@ -652,6 +661,10 @@
     border-color: var(--bao-border-hover, rgba(61, 220, 126, 0.45));
     background: var(--bao-surface-card-hover, rgba(26, 26, 36, 0.9));
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4), 0 0 15px var(--bao-emerald-soft, rgba(61, 220, 126, 0.15));
+}
+
+.menu-item:active {
+    transform: scale(0.98);
 }
 
 .menu-item.busy-pulse {
@@ -1172,13 +1185,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: background 1s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 1s cubic-bezier(0.2, 0.8, 0.2, 1), transform 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: background 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.15s ease;
     flex-shrink: 0;
 }
 
 .btn-inventory-mini:hover {
     background: rgba(245, 208, 111, 0.22);
     border-color: rgba(245, 208, 111, 0.5);
+    transform: translateY(-1px);
 }
 
 .btn-inventory-mini:active {
@@ -1197,18 +1211,26 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background 1s, color 1s, border-color 1s;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.15s ease;
     flex-shrink: 0;
 }
 
 .menu-close-btn:hover {
-    background: rgba(239, 68, 68, 0.15);
-    border-color: rgba(239, 68, 68, 0.3);
-    color: #ef4444;
+    background: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.7);
+    color: #fecaca;
+    transform: translateY(-1px);
+}
+
+.menu-close-btn:active {
+    transform: scale(0.94);
 }
 
 @media (max-height: 780px) {
     #menu-grid {
-        max-height: 320px;
+        max-height: clamp(240px, 42vh, 360px);
+    }
+    #chat {
+        font-size: 14px;
     }
 }
