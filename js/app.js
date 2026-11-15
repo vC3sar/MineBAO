@@ -565,7 +565,7 @@ function applyMenuFilter() {
       ${actionHint ? `<span class="menu-action-badge ${actionHint}">🖱️ Clic ${actionHint === 'right' ? 'Derecho' : 'Izquierdo'}</span>` : ''}
     </div>`;
 
-    const cleanItemName = normalizeQueryText(item.name || "");
+    const cleanItemName = normalizeQueryText(item.name || "").replace(/^minecraft:/, "").replace(/\s+/g, "_");
     const mainRowHtml = `<div class="menu-item-main-row">
       <div class="menu-item-icon" aria-hidden="true" data-kind="${kind}">
         <img class="menu-item-img" src="assets/mc-icons/${cleanItemName}.png" alt="" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-block';">
