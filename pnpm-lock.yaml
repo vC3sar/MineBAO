@@ -41,9 +41,18 @@ importers:
       ping:
         specifier: ^0.4.4
         version: 0.4.4
+      prismarine-chat:
+        specifier: ^1.13.0
+        version: 1.13.0
+      prismarine-nbt:
+        specifier: ^2.8.0
+        version: 2.8.0
       vec3:
         specifier: ^0.1.10
         version: 0.1.10
+      ws:
+        specifier: ^8.23.0
+        version: 8.23.0
     devDependencies:
       electron:
         specifier: ^31.7.7
@@ -1497,6 +1506,18 @@ packages:
     peerDependencies:
       bufferutil: ^4.0.1
       utf-8-validate: ^5.0.2
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
+  ws@8.23.0:
+    resolution: {integrity: sha512-wCkmX8QMOrKjgO8HW2WyDbTSGeqkocxgDzS9iR79rEAexty6/2qzilx3Ag8Tqf9ykop3irLKle0MtVn5qjVnoQ==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
     peerDependenciesMeta:
       bufferutil:
         optional: true
@@ -3257,6 +3278,8 @@ snapshots:
   wrappy@1.0.2: {}
 
   ws@7.5.14: {}
+
+  ws@8.23.0: {}
 
   xmlbuilder@15.1.1: {}
 

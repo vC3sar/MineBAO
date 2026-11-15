@@ -32,7 +32,10 @@
     "mineflayer-pathfinder": "^2.4.5",
     "path": "^0.12.7",
     "ping": "^0.4.4",
-    "vec3": "^0.1.10"
+    "prismarine-chat": "^1.13.0",
+    "prismarine-nbt": "^2.8.0",
+    "vec3": "^0.1.10",
+    "ws": "^8.23.0"
   },
   "devDependencies": {
     "electron": "^31.7.7",
