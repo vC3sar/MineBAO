@@ -31,9 +31,26 @@ try {
   console.error("[Main] Sentry init failed. Continuing without telemetry.", error);
 }
 
-function isKeepAliveTimeoutError(errorLike) {
+function isNetworkOrTimeoutError(errorLike) {
   const message = String(errorLike?.message || errorLike || "").toLowerCase();
-  return message.includes("client timed out after");
+  const code = String(errorLike?.code || "").toLowerCase();
+  return (
+    code === "etimedout" ||
+    code === "econnrefused" ||
+    code === "enotfound" ||
+    code === "ehostunreach" ||
+    code === "enetunreach" ||
+    code === "econnreset" ||
+    code === "epipe" ||
+    message.includes("etimedout") ||
+    message.includes("econnrefused") ||
+    message.includes("enotfound") ||
+    message.includes("ehostunreach") ||
+    message.includes("enetunreach") ||
+    message.includes("econnreset") ||
+    message.includes("client timed out after") ||
+    message.includes("connect etimedout")
+  );
 }
 
 let gameLauncher = null;
@@ -90,9 +107,9 @@ app.on("window-all-closed", () => {
 });
 
 process.on("uncaughtException", (error) => {
-  if (isKeepAliveTimeoutError(error)) {
+  if (isNetworkOrTimeoutError(error)) {
     console.warn(
-      "[Main] Suppressed keepalive timeout:",
+      "[Main] Handled network timeout/disconnect error:",
       error?.message || error,
     );
     return;
@@ -105,9 +122,9 @@ process.on("uncaughtException", (error) => {
 });
 
 process.on("unhandledRejection", (reason) => {
-  if (isKeepAliveTimeoutError(reason)) {
+  if (isNetworkOrTimeoutError(reason)) {
     console.warn(
-      "[Main] Suppressed keepalive timeout rejection:",
+      "[Main] Handled network timeout/disconnect rejection:",
       reason?.message || reason,
     );
     return;

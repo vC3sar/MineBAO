@@ -1058,14 +1058,27 @@ module.exports = function (profile) {
                   bot.inventory.slots[slot] ||
                   bot.inventory.items().find((i) => i.slot === slot);
                 if (item) {
-                  if (typeof bot.tossStack === "function") {
-                    bot.tossStack(item).catch((err) => {
-                      console.log("❌ Error tossing item stack:", err);
-                    });
-                  } else if (typeof bot.toss === "function") {
-                    bot.toss(item.type, null, item.count).catch((err) => {
-                      console.log("❌ Error tossing item:", err);
-                    });
+                  const dropWholeStack = Boolean(data.dropAll || (!data.dropSingle && item.count <= 1));
+                  if (dropWholeStack) {
+                    if (typeof bot.tossStack === "function") {
+                      bot.tossStack(item).catch((err) => {
+                        console.log("❌ Error tossing item stack:", err);
+                      });
+                    } else if (typeof bot.toss === "function") {
+                      bot.toss(item.type, null, item.count).catch((err) => {
+                        console.log("❌ Error tossing item:", err);
+                      });
+                    }
+                  } else {
+                    if (typeof bot.toss === "function") {
+                      bot.toss(item.type, null, 1).catch((err) => {
+                        console.log("❌ Error tossing item unit:", err);
+                      });
+                    } else if (typeof bot.tossStack === "function") {
+                      bot.tossStack(item).catch((err) => {
+                        console.log("❌ Error tossing item stack:", err);
+                      });
+                    }
                   }
                   setTimeout(
                     () => sendInventorySnapshot(ws, personalInventoryToken),
@@ -1167,7 +1180,16 @@ module.exports = function (profile) {
             try {
               if (bot.currentWindow) {
                 if (clickType === "drop") {
-                  bot.clickWindow(slot, 0, 4);
+                  const dropButton = data.dropAll ? 1 : 0;
+                  bot.clickWindow(slot, dropButton, 4);
+                } else if (clickType === "use") {
+                  const targetItem = bot.currentWindow.slots[slot];
+                  let isRight = false;
+                  if (targetItem) {
+                    const text = `${targetItem.name || ""} ${targetItem.displayName || ""} ${Array.isArray(targetItem.customLore) ? targetItem.customLore.join(" ") : ""}`.toLowerCase();
+                    isRight = text.includes("clic derecho") || text.includes("click derecho") || text.includes("right click");
+                  }
+                  bot.clickWindow(slot, isRight ? 1 : 0, 0);
                 } else {
                   bot.clickWindow(slot, mouseButton, 0);
                 }
@@ -1434,6 +1456,14 @@ module.exports = function (profile) {
       }
       debugLog("bot:error", err && err.message ? err.message : String(err));
       console.log("❌ Error:", err);
+      const errMsg = String(err?.message || err || "");
+      if (errMsg.includes("ETIMEDOUT")) {
+        emitChatLine("§c[Error de conexión] Tiempo de espera agotado al conectar al servidor (ETIMEDOUT). Verifica si el servidor está online o si la IP/puerto son correctos.", "system");
+      } else if (errMsg.includes("ECONNREFUSED")) {
+        emitChatLine("§c[Error de conexión] Conexión rechazada (ECONNREFUSED). El servidor parece estar apagado o el puerto es erróneo.", "system");
+      } else if (errMsg.includes("ENOTFOUND")) {
+        emitChatLine("§c[Error de conexión] No se pudo resolver la dirección del servidor (ENOTFOUND).", "system");
+      }
     });
 
     currentBot.on("end", () => {

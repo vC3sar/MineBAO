@@ -296,7 +296,10 @@ function renderMinecraftFormattedHTML(text) {
 }
 
 // ── Menu ──────────────────────────────────────────────────────────────────────
+let activeHoveredMenuItem = null;
+
 function clearMenu() {
+  activeHoveredMenuItem = null;
   activeMenu = null;
   menuBusyState = false;
   menuPanel.classList.remove("visible", "busy");
@@ -503,7 +506,7 @@ function getItemIcon(item) {
   return { icon: "📦", kind: "block" };
 }
 
-function executeMenuItemAction(item, clickType, cardElement = null) {
+function executeMenuItemAction(item, clickType, cardElement = null, extraData = {}) {
   const snapshot = activeMenu;
   if (!snapshot) return;
 
@@ -518,7 +521,13 @@ function executeMenuItemAction(item, clickType, cardElement = null) {
     menuBusy.textContent = t("app.menu.busy");
   }
 
-  sendSocketMessage({ type: "menuAction", token: snapshot.token, slot: item.slot, clickType });
+  sendSocketMessage({
+    type: "menuAction",
+    token: snapshot.token,
+    slot: item.slot,
+    clickType,
+    ...extraData,
+  });
 
   const rawName = item.customName || item.displayName || item.name || t("app.menu.element");
   const cleanName = sanitizeVisibleText(rawName).replace(/\(Clic [^)]+\)/i, "").trim();
@@ -526,7 +535,7 @@ function executeMenuItemAction(item, clickType, cardElement = null) {
   let actionLabel = "Clic Izquierdo";
   if (clickType === "right") actionLabel = "Clic Derecho";
   else if (clickType === "use") actionLabel = "Usar / Equipar";
-  else if (clickType === "drop") actionLabel = "Tirar ítem";
+  else if (clickType === "drop") actionLabel = extraData.dropAll ? "Tirar stack completo" : "Tirar ítem";
 
   appendLine(`[MENU] ${actionLabel} en slot ${item.slot}: ${cleanName}`, "system");
 
@@ -535,6 +544,7 @@ function executeMenuItemAction(item, clickType, cardElement = null) {
 }
 
 function applyMenuFilter() {
+  activeHoveredMenuItem = null;
   if (!activeMenu) return;
   const items = activeMenu.slots ?? [];
   const filter = parseMenuQuery(menuQuery);
@@ -552,6 +562,7 @@ function applyMenuFilter() {
     card.className = "menu-item";
     card.tabIndex = 0;
     card.setAttribute("role", "button");
+    card.setAttribute("title", "Clic: Acción recomendada | Clic Der: Clic Derecho | Rueda: Usar | Q: Soltar");
 
     const actionHint = detectItemActionHint(item);
     const isHotbar = item.slot >= 36 && item.slot <= 44;
@@ -592,8 +603,8 @@ function applyMenuFilter() {
     const actionsHtml = `<div class="menu-item-actions">
       <button type="button" class="item-act-btn act-left ${defaultAction === 'left' ? 'act-primary' : ''}" title="Clic Izquierdo">🖱️ Izq</button>
       <button type="button" class="item-act-btn act-right ${defaultAction === 'right' ? 'act-primary' : ''}" title="Clic Derecho">🖱️ Der</button>
-      <button type="button" class="item-act-btn act-use" title="Usar / Equipar en mano">⚡ Usar</button>
-      <button type="button" class="item-act-btn act-drop" title="Tirar ítem al suelo">🗑️ Tirar</button>
+      <button type="button" class="item-act-btn act-use" title="Usar / Equipar (o clic de rueda)">⚡ Usar</button>
+      <button type="button" class="item-act-btn act-drop" title="Tirar ítem (o presiona tecla Q)">🗑️ Tirar</button>
       <button type="button" class="item-act-btn act-more" title="Opciones avanzadas">⚙️</button>
     </div>`;
 
@@ -609,6 +620,29 @@ function applyMenuFilter() {
     card.addEventListener("contextmenu", (e) => {
       e.preventDefault();
       executeMenuItemAction(item, "right", card);
+    });
+
+    // Wheel click (middle click) directly executes "use"
+    card.addEventListener("auxclick", (e) => {
+      if (e.button === 1) {
+        e.preventDefault();
+        executeMenuItemAction(item, "use", card);
+      }
+    });
+    card.addEventListener("mousedown", (e) => {
+      if (e.button === 1) {
+        e.preventDefault();
+      }
+    });
+
+    // Hover tracking for Q shortcut
+    card.addEventListener("mouseenter", () => {
+      activeHoveredMenuItem = { item, card };
+    });
+    card.addEventListener("mouseleave", () => {
+      if (activeHoveredMenuItem?.card === card) {
+        activeHoveredMenuItem = null;
+      }
     });
 
     // Quick action buttons
@@ -798,6 +832,32 @@ input.addEventListener("keydown", (e) => {
   input.value = "";
   inputHistoryIndex = -1;
   inputDraft = "";
+});
+
+// Atajo de teclado: Tecla Q para soltar ítem cuando el cursor está sobre él
+window.addEventListener("keydown", (e) => {
+  if (e.key === "q" || e.key === "Q") {
+    const activeEl = document.activeElement;
+    if (
+      activeEl &&
+      (activeEl.tagName === "INPUT" ||
+        activeEl.tagName === "TEXTAREA" ||
+        activeEl.isContentEditable)
+    ) {
+      return;
+    }
+
+    if (activeHoveredMenuItem && activeHoveredMenuItem.item) {
+      e.preventDefault();
+      const dropAll = Boolean(e.ctrlKey);
+      executeMenuItemAction(
+        activeHoveredMenuItem.item,
+        "drop",
+        activeHoveredMenuItem.card,
+        { dropAll }
+      );
+    }
+  }
 });
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
