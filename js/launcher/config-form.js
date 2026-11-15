@@ -22,6 +22,20 @@
       document.getElementById("cfg-reconnect-backoff-max").value = String(launcher.reconnectBackoffMaxMs ?? 4000);
       document.getElementById("cfg-reconnect-jitter").value = String(launcher.reconnectJitterRatio ?? 0.2);
       if (dom.bgVideoModeSelect) dom.bgVideoModeSelect.value = String(launcher.menuBackgroundMode || dom.bgVideoModeSelect.value || "auto");
+
+      const bgTypeSelect = document.getElementById("bg-type-select");
+      if (bgTypeSelect) {
+        bgTypeSelect.value = String(launcher.backgroundType || "video");
+        const videoRow = document.getElementById("bg-video-options-row");
+        const customRow = document.getElementById("bg-custom-options-row");
+        if (videoRow) videoRow.classList.toggle("hidden", bgTypeSelect.value !== "video");
+        if (customRow) customRow.classList.toggle("hidden", bgTypeSelect.value !== "custom");
+      }
+
+      const customPathDisplay = document.getElementById("bg-custom-path-display");
+      if (customPathDisplay) {
+        customPathDisplay.textContent = launcher.customBackgroundPath || "Ningún archivo seleccionado";
+      }
     },
   };
 })();

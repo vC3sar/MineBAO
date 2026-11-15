@@ -42,6 +42,10 @@
           <i data-lucide="log-out"></i>
         </button>
       </div>
+      <div class="chat-filter-bar">
+        <input type="text" id="chat-filter-input" placeholder="Filtrar mensajes de chat..." aria-label="Filtrar mensajes de chat">
+        <button type="button" id="chat-scroll-btn" class="chat-tool-btn" title="Pausar / Reanudar auto-scroll" aria-label="Pausar o reanudar auto-scroll">⬇️ Auto-scroll</button>
+      </div>
       <div id="chat" style="overflow-wrap: anywhere;"></div>
       <div id="reconnect-panel">
         <div class="reconnect-copy">
@@ -152,6 +156,8 @@
       </div>
     </div>
   </div>
+
+  <div id="bao-toast-container" class="bao-toast-container" aria-live="polite"></div>
 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="js/shared/utils.js"></script>

@@ -39,3 +39,52 @@ body.app-page .launcher-overlay { display: none !important; }
   text-transform: uppercase;
   margin-top: 2px;
 }
+
+.chat-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(15, 17, 24, 0.7);
+  border-bottom: 1px solid var(--bao-border-subtle);
+  backdrop-filter: blur(8px);
+}
+
+#chat-filter-input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--bao-border-subtle);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: #f8fafc;
+  font-size: 12px;
+  outline: none;
+}
+
+#chat-filter-input:focus {
+  border-color: var(--bao-emerald);
+}
+
+.chat-tool-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--bao-border-subtle);
+  border-radius: 6px;
+  color: var(--bao-text-secondary);
+  font-size: 11px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.chat-tool-btn:hover {
+  background: var(--bao-emerald-soft);
+  border-color: var(--bao-emerald);
+  color: #fff;
+}
+
+.chat-tool-btn.paused {
+  background: rgba(248, 113, 113, 0.2);
+  border-color: var(--bao-status-error);
+  color: var(--bao-status-error);
+}

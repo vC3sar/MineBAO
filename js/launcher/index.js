@@ -35,6 +35,13 @@
     // ── DOM refs ────────────────────────────────────────────────────────────
     const $ = (id) => document.getElementById(id);
     const launcherBgVideo = $("launcher-bg-video");
+    const launcherBgStatic = $("launcher-bg-static");
+    const launcherBgCustom = $("launcher-bg-custom");
+    const bgTypeSelect = $("bg-type-select");
+    const bgVideoOptionsRow = $("bg-video-options-row");
+    const bgCustomOptionsRow = $("bg-custom-options-row");
+    const bgCustomBrowseBtn = $("bg-custom-browse-btn");
+    const bgCustomPathDisplay = $("bg-custom-path-display");
     const bgVideoModeSelect = $("bg-video-mode-select");
     const launcherMenuAudio = $("launcher-menu-audio");
     const launcherAudioToggle = $("launcher-audio-toggle");
@@ -63,10 +70,32 @@
     const gameScanJavaBtn = $("game-scan-java-btn");
     const gameShowDiagnosticsBtn = $("game-show-diagnostics-btn");
     const gameInstallStatus = $("game-install-status");
+    const playTabServersBtn = $("play-tab-servers");
     const playTabBotBtn = $("play-tab-bot");
     const playTabJavaBtn = $("play-tab-java");
+    const playTabServersPanel = $("play-tab-panel-servers");
     const playTabBotPanel = $("play-tab-panel-bot");
     const playTabJavaPanel = $("play-tab-panel-java");
+    const serversListContainer = $("servers-list-container");
+    const addServerBtn = $("add-server-btn");
+    const refreshServersBtn = $("refresh-servers-btn");
+    const serverModal = $("server-modal");
+    const serverModalTitle = $("server-modal-title");
+    const serverModalCloseBtn = $("server-modal-close-btn");
+    const serverModalCancelBtn = $("server-modal-cancel-btn");
+    const serverModalSaveBtn = $("server-modal-save-btn");
+    const serverModalTogglePass = $("server-modal-toggle-pass");
+    const serverModalId = $("server-modal-id");
+    const serverModalName = $("server-modal-name");
+    const serverModalIp = $("server-modal-ip");
+    const serverModalPort = $("server-modal-port");
+    const serverModalVersion = $("server-modal-version");
+    const serverModalUsername = $("server-modal-username");
+    const serverModalPassword = $("server-modal-password");
+    const serverModalCommand = $("server-modal-command");
+    const openMcFolderBtn = $("open-mc-folder-btn");
+    const openModsFolderBtn = $("open-mods-folder-btn");
+    const openLogsFolderBtn = $("open-logs-folder-btn");
     const filterRelease = $("filter-release");
     const filterSnapshot = $("filter-snapshot");
     const filterOldBeta = $("filter-old-beta");
@@ -78,8 +107,12 @@
     let menuAudioMuted = false;
     let menuAudioPlayPromise = null;
     let menuAudioUnlockBound = false;
+    let currentBgType = "video";
     let currentBgVideoMode = "auto";
     let currentBgVideoSrc = "";
+    let currentCustomBgPath = "";
+    let currentSavedServers = [];
+    let isPingingServers = false;
     let currentLauncherView = "main";
     let launcherViewHistory = ["main"];
     let activeMainMenuIndex = 0;
@@ -89,7 +122,7 @@
     let gameCatalog = { vanilla: [], forge: [], fabric: [] };
     let activeInstallId = "";
     let installPollTimer = null;
-    let activePlayTab = "bot";
+    let activePlayTab = "servers";
     let javaSectionCatalogLoaded = false;
     let msAuthState = { accounts: [], activeAccountId: null };
     let catalogRequestSeq = 0;
@@ -153,6 +186,68 @@
       launcherBgVideo.src = src;
       launcherBgVideo.load();
       launcherBgVideo.play().catch(() => { });
+    }
+
+    function applyLauncherBackground(bgType = currentBgType, videoMode = currentBgVideoMode, customPath = currentCustomBgPath) {
+      currentBgType = ["video", "static", "custom"].includes(bgType) ? bgType : "video";
+      currentBgVideoMode = BG_VALID_MODES.includes(videoMode) ? videoMode : "auto";
+      currentCustomBgPath = customPath || "";
+
+      if (currentBgType === "static") {
+        if (launcherBgVideo) {
+          launcherBgVideo.classList.add("hidden");
+          launcherBgVideo.pause();
+        }
+        launcherBgCustom?.classList.add("hidden");
+        launcherBgStatic?.classList.remove("hidden");
+      } else if (currentBgType === "custom" && currentCustomBgPath) {
+        launcherBgStatic?.classList.add("hidden");
+        const lower = currentCustomBgPath.toLowerCase();
+        const isVideo = lower.endsWith(".mp4") || lower.endsWith(".webm");
+
+        if (isVideo && launcherBgVideo) {
+          launcherBgCustom?.classList.add("hidden");
+          launcherBgVideo.classList.remove("hidden");
+          launcherBgVideo.src = currentCustomBgPath;
+          launcherBgVideo.load();
+          launcherBgVideo.play().catch(() => {});
+        } else if (launcherBgCustom) {
+          if (launcherBgVideo) {
+            launcherBgVideo.classList.add("hidden");
+            launcherBgVideo.pause();
+          }
+          launcherBgCustom.classList.remove("hidden");
+          launcherBgCustom.style.backgroundImage = `url("${currentCustomBgPath.replace(/\\/g, "/")}")`;
+        }
+      } else {
+        launcherBgStatic?.classList.add("hidden");
+        launcherBgCustom?.classList.add("hidden");
+        launcherBgVideo?.classList.remove("hidden");
+        applyLauncherBackgroundVideo(currentBgVideoMode);
+      }
+    }
+
+    async function browseCustomBackground() {
+      if (!launcherAPI?.selectCustomBackground) return;
+      const res = await launcherAPI.selectCustomBackground();
+      if (!res?.canceled && res.filePath) {
+        currentCustomBgPath = res.filePath;
+        if (bgCustomPathDisplay) {
+          bgCustomPathDisplay.textContent = currentCustomBgPath;
+        }
+        applyLauncherBackground("custom", currentBgVideoMode, currentCustomBgPath);
+        window.MCShared?.showToast("Fondo personalizado cargado", "success");
+      }
+    }
+
+    async function openFolder(folderType) {
+      if (!launcherAPI?.openFolder) return;
+      const res = await launcherAPI.openFolder(folderType);
+      if (res?.ok) {
+        window.MCShared?.showToast(`Carpeta abierta: ${res.path}`, "info");
+      } else {
+        window.MCShared?.showToast(res?.error || "No se pudo abrir la carpeta", "error");
+      }
     }
 
     // ── Menu audio ───────────────────────────────────────────────────────────
@@ -536,16 +631,251 @@
 
     // ── Play tab ─────────────────────────────────────────────────────────────
     function switchPlayTab(tab) {
-      activePlayTab = tab === "java" ? "java" : "bot";
-      document.querySelector(".launcher-shell")?.classList.toggle("java-expanded", activePlayTab === "java");
-      [{ btn: playTabBotBtn, id: "bot" }, { btn: playTabJavaBtn, id: "java" }].forEach(({ btn, id }) => {
+      activePlayTab = ["servers", "bot", "java"].includes(tab) ? tab : "servers";
+      document.querySelector(".launcher-shell")?.classList.toggle("java-expanded", activePlayTab === "java" || activePlayTab === "servers");
+      [
+        { btn: playTabServersBtn, id: "servers" },
+        { btn: playTabBotBtn, id: "bot" },
+        { btn: playTabJavaBtn, id: "java" },
+      ].forEach(({ btn, id }) => {
         if (!btn) return;
         const active = activePlayTab === id;
         btn.classList.toggle("active", active);
         btn.setAttribute("aria-selected", String(active));
       });
+      if (playTabServersPanel) playTabServersPanel.hidden = activePlayTab !== "servers";
       if (playTabBotPanel) playTabBotPanel.hidden = activePlayTab !== "bot";
       if (playTabJavaPanel) playTabJavaPanel.hidden = activePlayTab !== "java";
+
+      if (activePlayTab === "servers") {
+        loadAndRenderSavedServers();
+      }
+    }
+
+    // ── Saved Servers (Bookmarks) ─────────────────────────────────────────────
+    async function loadAndRenderSavedServers() {
+      if (!serversListContainer || !launcherAPI?.listServers) return;
+      serversListContainer.innerHTML = `<div class="servers-empty-state">${t("launcher.servers.empty")}</div>`;
+
+      try {
+        const res = await launcherAPI.listServers();
+        if (!res?.ok || !Array.isArray(res.servers) || res.servers.length === 0) {
+          serversListContainer.innerHTML = `<div class="servers-empty-state">${t("launcher.servers.empty")}</div>`;
+          return;
+        }
+
+        currentSavedServers = res.servers;
+        renderServerCards(currentSavedServers);
+        refreshServerPings(currentSavedServers);
+      } catch (err) {
+        console.warn("[Servers] Error loading servers:", err);
+      }
+    }
+
+    function renderServerCards(servers) {
+      if (!serversListContainer) return;
+      serversListContainer.innerHTML = "";
+
+      servers.forEach((server) => {
+        const card = document.createElement("div");
+        card.className = "server-card";
+        card.dataset.id = server.id;
+
+        const faviconSrc = server.favicon || "assets/logo/MineBAO-icono-256-oscuro.png";
+        const title = server.name || server.ip;
+        const address = `${server.ip}:${server.port || 25565}`;
+        const nick = server.username || "Jugador";
+        const ver = server.version || "1.21.1";
+
+        card.innerHTML = `
+          <div class="server-card-top">
+            <div class="server-card-main">
+              <img src="${faviconSrc}" class="server-favicon" id="favicon-${server.id}" alt="Icon">
+              <div class="server-card-details">
+                <span class="server-card-title">${title}</span>
+                <span class="server-card-address">${address}</span>
+              </div>
+            </div>
+            <div class="server-ping-badge" id="ping-badge-${server.id}">
+              <span class="server-ping-dot"></span>
+              <span class="server-ping-text">Comprobando...</span>
+            </div>
+          </div>
+          <div class="server-card-motd hidden" id="motd-${server.id}"></div>
+          <div class="server-card-footer">
+            <div class="server-card-meta">
+              <span>👤 ${nick}</span>
+              <span>🏷️ ${ver}</span>
+            </div>
+            <div class="server-card-actions">
+              <button type="button" class="server-act-btn primary btn-act-bot" title="Iniciar bot NoGUI"><span>${t("launcher.servers.botLaunch")}</span></button>
+              <button type="button" class="server-act-btn btn-act-game" title="Lanzar cliente Java"><span>${t("launcher.servers.gameLaunch")}</span></button>
+              <button type="button" class="server-act-btn btn-act-edit" title="Editar servidor"><span>✏️</span></button>
+              <button type="button" class="server-act-btn danger btn-act-delete" title="Eliminar"><span>🗑️</span></button>
+            </div>
+          </div>
+        `;
+
+        card.querySelector(".btn-act-bot")?.addEventListener("click", () => launchBotFromServer(server));
+        card.querySelector(".btn-act-game")?.addEventListener("click", () => launchGameFromServer(server));
+        card.querySelector(".btn-act-edit")?.addEventListener("click", () => openEditServerModal(server));
+        card.querySelector(".btn-act-delete")?.addEventListener("click", () => deleteServerCard(server.id));
+
+        serversListContainer.appendChild(card);
+      });
+    }
+
+    async function refreshServerPings(servers) {
+      if (isPingingServers) return;
+      isPingingServers = true;
+
+      for (const server of servers) {
+        const badge = $(`ping-badge-${server.id}`);
+        const motdEl = $(`motd-${server.id}`);
+        const faviconEl = $(`favicon-${server.id}`);
+
+        try {
+          const res = await launcherAPI.pingServer({ host: server.ip, port: server.port, timeoutMs: 3500 });
+          if (!badge) continue;
+
+          if (res?.online) {
+            badge.className = "server-ping-badge online";
+            badge.innerHTML = `<span class="server-ping-dot"></span><span class="server-ping-text">${res.latency}ms • ${res.playersOnline}/${res.playersMax}</span>`;
+            if (res.motd && motdEl) {
+              motdEl.textContent = res.motd;
+              motdEl.classList.remove("hidden");
+            }
+            if (res.favicon && faviconEl) {
+              faviconEl.src = res.favicon;
+            }
+          } else {
+            badge.className = "server-ping-badge offline";
+            badge.innerHTML = `<span class="server-ping-dot"></span><span class="server-ping-text">Offline</span>`;
+          }
+        } catch {
+          if (badge) {
+            badge.className = "server-ping-badge offline";
+            badge.innerHTML = `<span class="server-ping-dot"></span><span class="server-ping-text">Offline</span>`;
+          }
+        }
+      }
+
+      isPingingServers = false;
+    }
+
+    async function launchBotFromServer(server) {
+      if (!launcherAPI) return;
+      window.MCShared?.showToast(`Conectando Bot a ${server.name || server.ip}...`, "info");
+      const profile = {
+        username: server.username || "Jugador",
+        ip: server.ip,
+        port: server.port || 25565,
+        version: server.version || "1.21.1",
+        mode: "nogui",
+        autoLoginPassword: server.autoLoginPassword || "",
+        autoCommand: server.autoCommand || "",
+      };
+      const res = await launcherAPI.startNew(profile);
+      if (!res?.ok) {
+        window.MCShared?.showToast(translateError(res, "launcher.status.saveFailed"), "error");
+      }
+    }
+
+    async function launchGameFromServer(server) {
+      if (gameUsernameInput && server.username) gameUsernameInput.value = server.username;
+      switchPlayTab("java");
+      await ensureJavaCatalogLoadedOnce();
+      window.MCShared?.showToast(`Servidor ${server.name || server.ip} seleccionado.`, "success");
+    }
+
+    async function openAddServerModal() {
+      if (!serverModal) return;
+      if (serverModalTitle) serverModalTitle.textContent = t("launcher.servers.modalAddTitle");
+      if (serverModalId) serverModalId.value = "";
+      if (serverModalName) serverModalName.value = "";
+      if (serverModalIp) serverModalIp.value = "";
+      if (serverModalPort) serverModalPort.value = "25565";
+      if (serverModalVersion) serverModalVersion.value = "1.21.1";
+      if (serverModalUsername) serverModalUsername.value = gameUsernameInput?.value || "Jugador";
+      if (serverModalPassword) {
+        serverModalPassword.value = "";
+        serverModalPassword.type = "password";
+      }
+      if (serverModalCommand) serverModalCommand.value = "";
+      serverModal.classList.remove("hidden");
+      serverModalIp?.focus();
+    }
+
+    async function openEditServerModal(server) {
+      if (!serverModal) return;
+      if (serverModalTitle) serverModalTitle.textContent = t("launcher.servers.modalEditTitle");
+      if (serverModalId) serverModalId.value = server.id || "";
+      if (serverModalName) serverModalName.value = server.name || "";
+      if (serverModalIp) serverModalIp.value = server.ip || "";
+      if (serverModalPort) serverModalPort.value = String(server.port || 25565);
+      if (serverModalVersion) serverModalVersion.value = server.version || "1.21.1";
+      if (serverModalUsername) serverModalUsername.value = server.username || "";
+      if (serverModalCommand) serverModalCommand.value = server.autoCommand || "";
+
+      if (serverModalPassword) {
+        if (server.autoLoginPassword && typeof launcherAPI?.decryptPassword === "function") {
+          const dec = await launcherAPI.decryptPassword(server.autoLoginPassword);
+          serverModalPassword.value = dec.plainText || "";
+        } else {
+          serverModalPassword.value = server.autoLoginPassword || "";
+        }
+        serverModalPassword.type = "password";
+      }
+
+      serverModal.classList.remove("hidden");
+      serverModalName?.focus();
+    }
+
+    function closeServerModal() {
+      if (serverModal) serverModal.classList.add("hidden");
+    }
+
+    function toggleServerModalPassword() {
+      if (!serverModalPassword) return;
+      serverModalPassword.type = serverModalPassword.type === "password" ? "text" : "password";
+    }
+
+    async function saveServerModalForm() {
+      const ip = String(serverModalIp?.value || "").trim();
+      if (!ip) {
+        window.MCShared?.showToast("Debes ingresar la dirección IP del servidor", "error");
+        serverModalIp?.focus();
+        return;
+      }
+
+      const serverData = {
+        id: serverModalId?.value || undefined,
+        name: serverModalName?.value || ip,
+        ip,
+        port: Number.parseInt(serverModalPort?.value, 10) || 25565,
+        version: serverModalVersion?.value || "1.21.1",
+        username: serverModalUsername?.value || "Jugador",
+        autoLoginPassword: serverModalPassword?.value || "",
+        autoCommand: serverModalCommand?.value || "",
+      };
+
+      const res = await launcherAPI.saveServer(serverData);
+      if (res?.ok) {
+        closeServerModal();
+        window.MCShared?.showToast(t("launcher.servers.savedToast"), "success");
+        await loadAndRenderSavedServers();
+      } else {
+        window.MCShared?.showToast(res?.error || "Error al guardar servidor", "error");
+      }
+    }
+
+    async function deleteServerCard(id) {
+      if (!confirm(t("launcher.servers.deleteConfirm"))) return;
+      const res = await launcherAPI.deleteServer(id);
+      if (res?.ok) {
+        window.MCShared?.showToast(t("launcher.servers.deletedToast"), "info");
+        await loadAndRenderSavedServers();
+      }
     }
 
     async function ensureJavaCatalogLoadedOnce() {
@@ -727,6 +1057,16 @@
       $("cfg-max-reconnect-attempts").value = String(launcher.maxReconnectAttempts ?? 6);
       $("cfg-reconnect-backoff-max").value = String(launcher.reconnectBackoffMaxMs ?? 4000);
       $("cfg-reconnect-jitter").value = String(launcher.reconnectJitterRatio ?? 0.2);
+
+      if (bgTypeSelect) {
+        bgTypeSelect.value = String(launcher.backgroundType || "video");
+        if (bgVideoOptionsRow) bgVideoOptionsRow.classList.toggle("hidden", bgTypeSelect.value !== "video");
+        if (bgCustomOptionsRow) bgCustomOptionsRow.classList.toggle("hidden", bgTypeSelect.value !== "custom");
+      }
+      currentCustomBgPath = launcher.customBackgroundPath || "";
+      if (bgCustomPathDisplay) {
+        bgCustomPathDisplay.textContent = currentCustomBgPath || "Ningún archivo seleccionado";
+      }
     }
 
     function buildConfigFromForm() {
@@ -745,6 +1085,8 @@
           reconnectBackoffMaxMs: pInt("cfg-reconnect-backoff-max", 4000),
           reconnectJitterRatio: pFloat("cfg-reconnect-jitter", 0.2),
           menuBackgroundMode: bgVideoModeSelect?.value || "auto",
+          backgroundType: bgTypeSelect?.value || "video",
+          customBackgroundPath: currentCustomBgPath || "",
           language: String($("cfg-language")?.value || "es").toLowerCase(),
         },
       };
@@ -1035,6 +1377,16 @@
       setMsActiveAccountId: (id) => { msAuthState.activeAccountId = id; },
       renderMsAccounts,
       translateError,
+      applyLauncherBackground,
+      browseCustomBackground,
+      openFolder,
+      getCurrentCustomBgPath: () => currentCustomBgPath,
+      openAddServerModal,
+      openEditServerModal,
+      closeServerModal,
+      saveServerModalForm,
+      toggleServerModalPassword,
+      loadAndRenderSavedServers,
     };
 
     // ── NS plugin overrides ──────────────────────────────────────────────────
@@ -1083,18 +1435,22 @@
         .then((cfg) => {
           const mode = String(cfg?.launcher?.menuBackgroundMode || "auto").toLowerCase();
           currentBgVideoMode = BG_VALID_MODES.includes(mode) ? mode : "auto";
+          currentBgType = String(cfg?.launcher?.backgroundType || "video").toLowerCase();
+          currentCustomBgPath = String(cfg?.launcher?.customBackgroundPath || "").trim();
           i18n?.setLanguage?.(String(cfg?.launcher?.language || "es"));
           if (bgVideoModeSelect) bgVideoModeSelect.value = currentBgVideoMode;
-          applyLauncherBackgroundVideo(currentBgVideoMode);
+          applyLauncherBackground(currentBgType, currentBgVideoMode, currentCustomBgPath);
         })
-        .catch(() => applyLauncherBackgroundVideo("auto"));
+        .catch(() => applyLauncherBackground("video", "auto"));
+
+      loadAndRenderSavedServers();
     } else {
-      applyLauncherBackgroundVideo("auto");
+      applyLauncherBackground("video", "auto");
     }
 
     if (launcherBgVideo) {
-      bindEvent(window, "resize", () => { if (currentBgVideoMode === "auto") applyLauncherBackgroundVideo("auto"); });
-      bindEvent(document, "fullscreenchange", () => { if (currentBgVideoMode === "auto") applyLauncherBackgroundVideo("auto"); });
+      bindEvent(window, "resize", () => { if (currentBgVideoMode === "auto" && currentBgType === "video") applyLauncherBackgroundVideo("auto"); });
+      bindEvent(document, "fullscreenchange", () => { if (currentBgVideoMode === "auto" && currentBgType === "video") applyLauncherBackgroundVideo("auto"); });
     }
 
     NS.navigation?.setupKeyboard?.(navigationCtx);

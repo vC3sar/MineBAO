@@ -25,9 +25,14 @@ const {
   shutdownDiscordPresence,
 } = require("./fn/discord");
 const appConfig = require("./config.json");
+const { decryptPassword } = require("./src/main/crypto-util");
 
 module.exports = function (profile) {
   const { username, version, ip } = profile;
+  const autoLoginPass = profile.autoLoginPassword
+    ? decryptPassword(profile.autoLoginPassword)
+    : "";
+  const autoCmd = profile.autoCommand ? String(profile.autoCommand).trim() : "";
   const port = Number.parseInt(profile.port ?? "25565", 10) || 25565;
   const sessionId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
   const runtimeCfg = resolveBotRuntimeConfig(appConfig, version);
@@ -1273,6 +1278,24 @@ module.exports = function (profile) {
         maxAttempts: maxReconnectAttempts,
         reasonType: "recovered",
       });
+
+      if (autoLoginPass || autoCmd) {
+        setTimeout(() => {
+          if (!currentBot || !botReady) return;
+          try {
+            if (autoLoginPass) {
+              console.log("🔐 [MineBAO Bot] Ejecutando auto-login seguro...");
+              currentBot.chat(`/login ${autoLoginPass}`);
+            }
+            if (autoCmd) {
+              console.log(`🤖 [MineBAO Bot] Ejecutando comando automático: ${autoCmd}`);
+              currentBot.chat(autoCmd);
+            }
+          } catch (e) {
+            console.warn("⚠️ [MineBAO Bot] Error ejecutando auto-login / comando:", e?.message || e);
+          }
+        }, 1200);
+      }
       console.log(`✅ Logued as ${currentBot.username}`);
       emitChatLine(`✅ Logued as ${currentBot.username}`, "system");
       flushPendingOutboundMessages();

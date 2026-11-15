@@ -1,5 +1,63 @@
 :root {
-  --mc-accent: #f5d06f;
-  --mc-bg-1: #252527;
-  --mc-bg-2: #07071b;
+  /* MineBAO Brand Palette */
+  --bao-emerald: #3ddc7e;
+  --bao-emerald-hover: #4df492;
+  --bao-emerald-dark: #13a04e;
+  --bao-emerald-glow: rgba(61, 220, 126, 0.28);
+  --bao-emerald-soft: rgba(61, 220, 126, 0.12);
+
+  /* Surface & Backgrounds */
+  --bao-bg-base: #08080b;
+  --bao-bg-obsidian: #0b0b0e;
+  --bao-surface-card: rgba(18, 18, 24, 0.78);
+  --bao-surface-card-hover: rgba(26, 26, 36, 0.88);
+  --bao-surface-modal: rgba(15, 15, 20, 0.94);
+  --bao-surface-input: rgba(10, 10, 14, 0.82);
+
+  /* Borders & Dividers */
+  --bao-border-subtle: rgba(255, 255, 255, 0.08);
+  --bao-border-hover: rgba(61, 220, 126, 0.4);
+  --bao-border-focus: #3ddc7e;
+
+  /* Typography */
+  --bao-text-primary: #f8fafc;
+  --bao-text-secondary: #cbd5e1;
+  --bao-text-muted: #94a3b8;
+  --bao-text-parchment: #f0d8b8;
+  --bao-text-gold: #f5d06f;
+
+  /* Status Colors */
+  --bao-status-ok: #3ddc7e;
+  --bao-status-warn: #fbbf24;
+  --bao-status-error: #f87171;
+  --bao-status-info: #38bdf8;
+
+  /* Backward Compatibility */
+  --mc-accent: var(--bao-emerald);
+  --mc-bg-1: #1a1a24;
+  --mc-bg-2: #08080b;
+}
+
+/* Accessibility: Universal Focus Ring (WCAG AA) */
+:focus-visible {
+  outline: 2px solid var(--bao-emerald) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 12px var(--bao-emerald-glow) !important;
+}
+
+/* Accessibility: Reduce Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  #launcher-bg-video {
+    display: none !important;
+  }
+  .launcher-page {
+    background: radial-gradient(circle at top center, #161822 0%, #08080b 100%) !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

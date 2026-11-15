@@ -1,8 +1,10 @@
-const { app, ipcMain, BrowserWindow } = require("electron");
+const { app, ipcMain, BrowserWindow, shell, dialog } = require("electron");
 const path = require("path");
+const fs = require("fs");
 const configManager = require("./config");
 const windowManager = require("./window");
 const botManager = require("./bot");
+const { pingMinecraftServer } = require("./server-query");
 const LANGUAGE_CHANGED_CHANNEL = "settings:languageChanged";
 
 function broadcastLanguageChanged(language) {
@@ -290,6 +292,92 @@ function setupIpcHandlers(gameLauncher) {
     if (!gameLauncher)
       return { ok: false, errorCode: "launcher_not_initialized", error: "Launcher service not initialized." };
     return gameLauncher.removeAuthSession(String(accountId || ""));
+  });
+
+  // Server Bookmarks & Query
+  ipcMain.handle("server:ping", async (_, payload) => {
+    const host = String(payload?.host || "").trim();
+    const port = Number.parseInt(payload?.port, 10) || 25565;
+    const timeoutMs = Number.parseInt(payload?.timeoutMs, 10) || 4500;
+    if (!host) {
+      return { online: false, error: "Host no especificado" };
+    }
+    return pingMinecraftServer(host, port, timeoutMs);
+  });
+
+  ipcMain.handle("servers:list", () => {
+    return { ok: true, servers: configManager.loadServers() };
+  });
+
+  ipcMain.handle("servers:save", (_, server) => {
+    if (!server || typeof server !== "object") {
+      return { ok: false, error: "Datos de servidor inválidos" };
+    }
+    const saved = configManager.saveServer(server);
+    return { ok: true, server: saved };
+  });
+
+  ipcMain.handle("servers:delete", (_, id) => {
+    return configManager.deleteServer(String(id || ""));
+  });
+
+  ipcMain.handle("crypto:decrypt", (_, cipherText) => {
+    return { ok: true, plainText: configManager.decryptPassword(String(cipherText || "")) };
+  });
+
+  ipcMain.handle("crypto:encrypt", (_, plainText) => {
+    return { ok: true, cipherText: configManager.encryptPassword(String(plainText || "")) };
+  });
+
+  // Background Customization Dialog
+  ipcMain.handle("dialog:selectCustomBackground", async () => {
+    const win = windowManager.mainWindow;
+    const res = await dialog.showOpenDialog(win, {
+      title: "Seleccionar fondo personalizado (Imagen o Video)",
+      filters: [
+        { name: "Multimedia", extensions: ["mp4", "webm", "png", "jpg", "jpeg", "webp"] },
+        { name: "Videos", extensions: ["mp4", "webm"] },
+        { name: "Imágenes", extensions: ["png", "jpg", "jpeg", "webp"] },
+        { name: "Todos los archivos", extensions: ["*"] },
+      ],
+      properties: ["openFile"],
+    });
+    if (res.canceled || !res.filePaths?.[0]) {
+      return { canceled: true, filePath: null };
+    }
+    return { canceled: false, filePath: res.filePaths[0] };
+  });
+
+  // System Folder Openers
+  ipcMain.handle("system:openFolder", async (_, folderType) => {
+    try {
+      const cfg = configManager.loadConfig();
+      const customDir = cfg?.launcher?.downloads?.minecraftDir;
+      const defaultMcDir =
+        process.platform === "win32"
+          ? path.join(process.env.APPDATA || "", ".minecraft")
+          : path.join(app.getPath("home"), ".minecraft");
+      const mcDir = customDir && fs.existsSync(customDir) ? customDir : defaultMcDir;
+
+      let target = mcDir;
+      if (folderType === "mods") {
+        target = path.join(mcDir, "mods");
+      } else if (folderType === "logs") {
+        target = path.join(mcDir, "logs");
+      }
+
+      if (!fs.existsSync(target)) {
+        fs.mkdirSync(target, { recursive: true });
+      }
+
+      const openErr = await shell.openPath(target);
+      if (openErr) {
+        return { ok: false, error: openErr };
+      }
+      return { ok: true, path: target };
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
   });
 }
 

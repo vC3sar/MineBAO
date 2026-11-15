@@ -10,5 +10,7 @@ dist/**/*
 .idea/
 *.log
 *.txt
+.minebao_key
+servers.json
 minebao.logos.files/
 minebao.logos.files.zip

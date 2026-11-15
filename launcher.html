@@ -16,6 +16,8 @@
 <body class="launcher-page">
   <div id="launcher-overlay" class="launcher-overlay">
     <video id="launcher-bg-video" class="launcher-bg-video" autoplay muted loop playsinline></video>
+    <div id="launcher-bg-static" class="launcher-bg-static hidden"></div>
+    <div id="launcher-bg-custom" class="launcher-bg-custom hidden"></div>
     <audio id="launcher-menu-audio" loop>
       <source src="mp3/main-menu.mp3" type="audio/mpeg">
     </audio>
@@ -43,10 +45,22 @@
       <div id="launcher-play-view" class="launcher-view">
         <div class="launcher-section-title" data-i18n="launcher.title.play">Jugar (Multijugador / Juego Java)</div>
         <div class="launcher-play-tabs" role="tablist" data-i18n-aria-label="launcher.play.modeAria" aria-label="Modo de juego">
-          <button type="button" id="play-tab-bot" class="launcher-play-tab active" role="tab" aria-selected="true" aria-controls="play-tab-panel-bot"><i data-lucide="bot"></i><span data-i18n="launcher.play.botFast">Bot rápido</span></button>
+          <button type="button" id="play-tab-servers" class="launcher-play-tab active" role="tab" aria-selected="true" aria-controls="play-tab-panel-servers"><i data-lucide="bookmark"></i><span data-i18n="launcher.play.servers">Mis Servidores</span></button>
+          <button type="button" id="play-tab-bot" class="launcher-play-tab" role="tab" aria-selected="false" aria-controls="play-tab-panel-bot"><i data-lucide="bot"></i><span data-i18n="launcher.play.botFast">Bot rápido</span></button>
           <button type="button" id="play-tab-java" class="launcher-play-tab" role="tab" aria-selected="false" aria-controls="play-tab-panel-java"><i data-lucide="gamepad-2"></i><span data-i18n="launcher.play.javaGame">Juego Java</span></button>
         </div>
-        <div id="play-tab-panel-bot" class="launcher-play-panel active" role="tabpanel">
+
+        <div id="play-tab-panel-servers" class="launcher-play-panel active" role="tabpanel">
+          <div class="servers-header-bar">
+            <button type="button" id="add-server-btn" class="launcher-btn alt"><i data-lucide="plus"></i><span data-i18n="launcher.servers.add">Agregar Servidor</span></button>
+            <button type="button" id="refresh-servers-btn" class="launcher-btn alt"><i data-lucide="refresh-cw"></i><span data-i18n="launcher.servers.refresh">Actualizar Pings</span></button>
+          </div>
+          <div id="servers-list-container" class="servers-list-container">
+            <div class="servers-empty-state" data-i18n="launcher.servers.empty">Cargando servidores guardados...</div>
+          </div>
+        </div>
+
+        <div id="play-tab-panel-bot" class="launcher-play-panel" role="tabpanel" hidden>
           <div class="launcher-helper-text" data-i18n="launcher.play.botHelp">Conexión rápida al panel Mineflayer.</div>
           <div class="launcher-row">
             <button type="button" id="continue-last-btn" class="launcher-btn alt"><i data-lucide="history"></i><span data-i18n="launcher.play.continue">Continuar con la ultima</span></button>
@@ -195,8 +209,28 @@
           </select>
         </div>
         <div class="launcher-row">
-          <label for="bg-video-mode-select" data-i18n="launcher.form.videoMenu">Video menu:</label>
+          <label for="bg-type-select" data-i18n="launcher.form.bgType">Tipo de fondo:</label>
+          <select id="bg-type-select">
+            <option value="video" data-i18n="launcher.bgType.video">Video cinemático</option>
+            <option value="static" data-i18n="launcher.bgType.static">Fondo estático (Bajo consumo)</option>
+            <option value="custom" data-i18n="launcher.bgType.custom">Personalizado (Imagen / Video)</option>
+          </select>
+        </div>
+        <div class="launcher-row" id="bg-video-options-row">
+          <label for="bg-video-mode-select" data-i18n="launcher.form.videoMenu">Resolución video:</label>
           <select id="bg-video-mode-select"><option value="auto">Auto</option><option value="1080p">Forzar 1080p</option><option value="2k">Forzar 2K</option><option value="4k">Forzar 4K</option></select>
+        </div>
+        <div class="launcher-row hidden" id="bg-custom-options-row">
+          <button type="button" id="bg-custom-browse-btn" class="launcher-btn alt"><i data-lucide="file-video"></i><span data-i18n="launcher.form.browseCustomBg">Seleccionar archivo...</span></button>
+          <span id="bg-custom-path-display" class="launcher-helper-text" style="max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+        </div>
+        <div style="margin-top: 14px; width: 100%;">
+          <label data-i18n="launcher.form.systemShortcuts">Accesos Rápidos del Sistema</label>
+          <div class="launcher-folder-shortcuts">
+            <button type="button" id="open-mc-folder-btn" class="launcher-link"><i data-lucide="folder"></i><span data-i18n="launcher.form.openMcFolder">Carpeta .minecraft</span></button>
+            <button type="button" id="open-mods-folder-btn" class="launcher-link"><i data-lucide="package"></i><span data-i18n="launcher.form.openModsFolder">Mods Fabric</span></button>
+            <button type="button" id="open-logs-folder-btn" class="launcher-link"><i data-lucide="file-text"></i><span data-i18n="launcher.form.openLogsFolder">Logs del juego</span></button>
+          </div>
         </div>
         <div class="launcher-row">
           <button type="button" id="save-config-btn" class="launcher-btn" data-i18n="common.saveConfig">Guardar config.json</button>
@@ -221,6 +255,61 @@
       <span class="launcher-control-item"><i data-lucide="corner-down-left"></i><span>Enter</span></span>
       <span class="launcher-control-item"><i data-lucide="x"></i><span>Esc</span></span>
     </div>
+
+    <!-- Modal para Agregar/Editar Servidor Guardado -->
+    <div id="server-modal" class="bao-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="server-modal-title">
+      <div class="bao-modal-card">
+        <div class="bao-modal-header">
+          <div id="server-modal-title" class="bao-modal-title" data-i18n="launcher.servers.modalAddTitle">Nuevo Servidor</div>
+          <button type="button" id="server-modal-close-btn" class="menu-close-btn" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="launcher-form">
+          <input type="hidden" id="server-modal-id">
+
+          <label for="server-modal-name"><i data-lucide="tag"></i><span data-i18n="launcher.servers.fieldServerName">Nombre del servidor (opcional)</span></label>
+          <input id="server-modal-name" type="text" placeholder="Ej: Mi Survival Favorito">
+
+          <div class="launcher-row" style="gap: 10px;">
+            <div style="flex: 2;">
+              <label for="server-modal-ip"><i data-lucide="globe"></i><span data-i18n="launcher.servers.fieldIp">Dirección IP</span></label>
+              <input id="server-modal-ip" type="text" placeholder="mc.haliacraft.com" required>
+            </div>
+            <div style="flex: 1;">
+              <label for="server-modal-port"><i data-lucide="hash"></i><span data-i18n="launcher.servers.fieldPort">Puerto</span></label>
+              <input id="server-modal-port" type="number" placeholder="25565" value="25565">
+            </div>
+          </div>
+
+          <div class="launcher-row" style="gap: 10px;">
+            <div style="flex: 1;">
+              <label for="server-modal-version"><i data-lucide="list-tree"></i><span data-i18n="launcher.servers.fieldVersion">Versión</span></label>
+              <input id="server-modal-version" type="text" placeholder="1.21.1">
+            </div>
+            <div style="flex: 1;">
+              <label for="server-modal-username"><i data-lucide="user"></i><span data-i18n="launcher.servers.fieldUsername">Nickname offline</span></label>
+              <input id="server-modal-username" type="text" placeholder="Jugador">
+            </div>
+          </div>
+
+          <label for="server-modal-password"><i data-lucide="key"></i><span data-i18n="launcher.servers.fieldAutoPass">Contraseña Auto-Login (/login)</span></label>
+          <div class="input-password-wrap">
+            <input id="server-modal-password" type="password" placeholder="Clave para /login automático">
+            <button type="button" id="server-modal-toggle-pass" class="btn-toggle-password" title="Mostrar/Ocultar contraseña"><i data-lucide="eye"></i></button>
+          </div>
+
+          <label for="server-modal-command"><i data-lucide="terminal"></i><span data-i18n="launcher.servers.fieldAutoCmd">Comando adicional</span></label>
+          <input id="server-modal-command" type="text" placeholder="Ej: /server survival o /register clave clave">
+
+          <div class="launcher-row" style="margin-top: 14px; justify-content: flex-end; gap: 10px;">
+            <button type="button" id="server-modal-cancel-btn" class="launcher-link" data-i18n="common.back">Cancelar</button>
+            <button type="button" id="server-modal-save-btn" class="launcher-btn"><i data-lucide="save"></i><span>Guardar</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenedor de Notificaciones Toast -->
+    <div id="bao-toast-container" class="bao-toast-container" aria-live="polite"></div>
   </div>
 
   <script src="https://unpkg.com/lucide@latest"></script>

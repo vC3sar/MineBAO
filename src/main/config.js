@@ -2,6 +2,7 @@ const path = require("path");
 const { app } = require("electron");
 const fs = require("fs");
 const { loadJsonSafe, saveJson, parseHostAndPort } = require("./utils");
+const { encryptPassword, decryptPassword } = require("./crypto-util");
 
 const APP_ROOT = path.join(__dirname, "../../");
 const LEGACY_PROFILE_FILE = path.join(APP_ROOT, "profiles.json");
@@ -54,6 +55,10 @@ function mergeLauncherDefaults(raw) {
     reconnectBackoffMaxMs: Number.parseInt(launcher.reconnectBackoffMaxMs || "4000", 10) || 4000,
     reconnectJitterRatio: Number.parseFloat(launcher.reconnectJitterRatio || "0.2") || 0.2,
     menuBackgroundMode: launcher.menuBackgroundMode || "auto",
+    backgroundType: ["video", "static", "custom"].includes(String(launcher.backgroundType || "").toLowerCase())
+      ? String(launcher.backgroundType).toLowerCase()
+      : "video",
+    customBackgroundPath: String(launcher.customBackgroundPath || "").trim(),
     language: ["es", "en"].includes(String(launcher.language || "").toLowerCase()) ? String(launcher.language).toLowerCase() : "es",
     catalogCache: {
       ttlMs: Number.parseInt(launcher?.catalogCache?.ttlMs || "21600000", 10) || 21600000,
@@ -110,6 +115,8 @@ function normalizeProfile(profile) {
     port: Number.parseInt(profile.port ?? parsedAddress.port ?? "25565", 10) || parsedAddress.port || 25565,
     version,
     mode: "nogui",
+    autoLoginPassword: profile.autoLoginPassword || "",
+    autoCommand: profile.autoCommand || "",
   };
 }
 
@@ -127,16 +134,91 @@ function saveConfig(config) {
   saveJson(getConfigFile(), mergeLauncherDefaults(config));
 }
 
+function getServersFile() {
+  return path.join(getStorageDir(), "servers.json");
+}
+
+function loadServers() {
+  const file = getServersFile();
+  const list = loadJsonSafe(file, null);
+  if (Array.isArray(list)) {
+    return list;
+  }
+  const lastProfile = loadProfile();
+  if (lastProfile) {
+    const initial = [
+      {
+        id: "server-default",
+        name: lastProfile.ip || "Mi Servidor",
+        ip: lastProfile.ip || DEFAULT_SERVER,
+        port: lastProfile.port || 25565,
+        version: lastProfile.version || "1.21.1",
+        username: lastProfile.username || "Jugador",
+        autoLoginPassword: "",
+        autoCommand: "",
+        distribution: "fabric",
+      },
+    ];
+    saveJson(file, initial);
+    return initial;
+  }
+  return [];
+}
+
+function saveServer(serverData) {
+  const servers = loadServers();
+  const id = serverData.id || `srv-${Date.now()}`;
+  let password = String(serverData.autoLoginPassword || "").trim();
+  if (password && !password.startsWith("enc:v1:")) {
+    password = encryptPassword(password);
+  }
+
+  const newServer = {
+    id,
+    name: String(serverData.name || serverData.ip || "Servidor").trim(),
+    ip: String(serverData.ip || DEFAULT_SERVER).trim(),
+    port: Number.parseInt(serverData.port, 10) || 25565,
+    version: String(serverData.version || "1.21.1").trim(),
+    username: String(serverData.username || "").trim(),
+    autoLoginPassword: password,
+    autoCommand: String(serverData.autoCommand || "").trim(),
+    distribution: String(serverData.distribution || "fabric").trim(),
+  };
+
+  const existingIdx = servers.findIndex((s) => s.id === id);
+  if (existingIdx >= 0) {
+    servers[existingIdx] = newServer;
+  } else {
+    servers.push(newServer);
+  }
+
+  saveJson(getServersFile(), servers);
+  return newServer;
+}
+
+function deleteServer(id) {
+  const servers = loadServers();
+  const filtered = servers.filter((s) => s.id !== id);
+  saveJson(getServersFile(), filtered);
+  return { ok: true };
+}
+
 module.exports = {
   APP_ROOT,
   getConfigFile,
   getProfileFile,
+  getServersFile,
   loadConfig,
   saveConfig,
   mergeLauncherDefaults,
   normalizeProfile,
   loadProfile,
   saveProfile,
+  loadServers,
+  saveServer,
+  deleteServer,
+  decryptPassword,
+  encryptPassword,
 };
 
 

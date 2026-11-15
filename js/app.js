@@ -148,6 +148,36 @@ function resetChatHistory(sessionId, history = []) {
   chat.scrollTop = chat.scrollHeight;
 }
 
+let autoScrollEnabled = true;
+let chatFilterQuery = "";
+const chatFilterInput = $("chat-filter-input");
+const chatScrollBtn = $("chat-scroll-btn");
+
+if (chatFilterInput) {
+  chatFilterInput.addEventListener("input", () => {
+    chatFilterQuery = String(chatFilterInput.value || "").toLowerCase().trim();
+    Array.from(chat.children).forEach((node) => {
+      if (!chatFilterQuery) {
+        node.style.display = "";
+      } else {
+        const matches = node.textContent.toLowerCase().includes(chatFilterQuery);
+        node.style.display = matches ? "" : "none";
+      }
+    });
+  });
+}
+
+if (chatScrollBtn) {
+  chatScrollBtn.addEventListener("click", () => {
+    autoScrollEnabled = !autoScrollEnabled;
+    chatScrollBtn.classList.toggle("paused", !autoScrollEnabled);
+    chatScrollBtn.textContent = autoScrollEnabled ? "⬇️ Auto-scroll" : "⏸️ Pausado";
+    if (autoScrollEnabled) {
+      chat.scrollTop = chat.scrollHeight;
+    }
+  });
+}
+
 const KIND_COLORS = { system: "#7dd3fc", player: "#ffffff", local: "#ffffff", server: "#fca5a5" };
 
 function renderLine(text, kind = "normal", persist = true) {
@@ -157,6 +187,10 @@ function renderLine(text, kind = "normal", persist = true) {
   const line = document.createElement("div");
   line.textContent = text;
   if (KIND_COLORS[kind]) line.style.color = KIND_COLORS[kind];
+  if (chatFilterQuery) {
+    const matches = text.toLowerCase().includes(chatFilterQuery);
+    line.style.display = matches ? "" : "none";
+  }
   chat.appendChild(line);
   if (persist) {
     chatHistory.push({ text, source: kind });
@@ -165,7 +199,7 @@ function renderLine(text, kind = "normal", persist = true) {
       while (chat.childNodes.length > chatHistoryLimit) chat.removeChild(chat.firstChild);
     }
   }
-  if (atBottom) chat.scrollTop = chat.scrollHeight;
+  if (autoScrollEnabled && atBottom) chat.scrollTop = chat.scrollHeight;
 }
 
 function appendLine(text, kind = "normal") { renderLine(text, kind, true); }

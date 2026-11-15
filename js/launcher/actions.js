@@ -93,6 +93,40 @@
       });
 
       if (ctx.dom.bgVideoModeSelect) bindEvent(ctx.dom.bgVideoModeSelect, "change", () => ctx.applyLauncherBackgroundVideo(ctx.dom.bgVideoModeSelect.value));
+
+      // Background Type switcher
+      const bgTypeSelect = document.getElementById("bg-type-select");
+      if (bgTypeSelect) {
+        bindEvent(bgTypeSelect, "change", () => {
+          const type = bgTypeSelect.value;
+          const videoRow = document.getElementById("bg-video-options-row");
+          const customRow = document.getElementById("bg-custom-options-row");
+          if (videoRow) videoRow.classList.toggle("hidden", type !== "video");
+          if (customRow) customRow.classList.toggle("hidden", type !== "custom");
+          ctx.applyLauncherBackground(type, ctx.dom.bgVideoModeSelect?.value, ctx.getCurrentCustomBgPath?.());
+        });
+      }
+
+      bindClick("bg-custom-browse-btn", async () => {
+        if (typeof ctx.browseCustomBackground === "function") {
+          await ctx.browseCustomBackground();
+        }
+      });
+
+      // System Folders
+      bindClick("open-mc-folder-btn", () => ctx.openFolder?.("minecraft"));
+      bindClick("open-mods-folder-btn", () => ctx.openFolder?.("mods"));
+      bindClick("open-logs-folder-btn", () => ctx.openFolder?.("logs"));
+
+      // Play Tabs & Server Bookmarks
+      bindClick("play-tab-servers", () => ctx.switchPlayTab("servers"));
+      bindClick("add-server-btn", () => ctx.openAddServerModal?.());
+      bindClick("refresh-servers-btn", () => ctx.loadAndRenderSavedServers?.());
+      bindClick("server-modal-close-btn", () => ctx.closeServerModal?.());
+      bindClick("server-modal-cancel-btn", () => ctx.closeServerModal?.());
+      bindClick("server-modal-save-btn", () => ctx.saveServerModalForm?.());
+      bindClick("server-modal-toggle-pass", () => ctx.toggleServerModalPassword?.());
+
       if (ctx.dom.playTabBotBtn) bindEvent(ctx.dom.playTabBotBtn, "click", () => ctx.switchPlayTab("bot"));
       if (ctx.dom.playTabJavaBtn) bindEvent(ctx.dom.playTabJavaBtn, "click", async () => { ctx.switchPlayTab("java"); await ctx.ensureJavaCatalogLoadedOnce(); });
       if (ctx.dom.gameDistributionSelect) bindEvent(ctx.dom.gameDistributionSelect, "change", async () => { ctx.updateFilterVisibilityByDistribution(); ctx.refreshVersionSelect(); await ctx.loadGameCatalog(true); });
@@ -124,7 +158,7 @@
       if (ctx.dom.gameExtraJvmArgsInput) bindEvent(ctx.dom.gameExtraJvmArgsInput, "change", async () => { await ctx.persistLaunchOptionsToConfig(); });
       if (ctx.dom.gameExtraGameArgsInput) bindEvent(ctx.dom.gameExtraGameArgsInput, "change", async () => { await ctx.persistLaunchOptionsToConfig(); });
 
-      ctx.switchPlayTab("bot");
+      ctx.switchPlayTab("servers");
       if (ctx.dom.gameAuthModeSelect) ctx.dom.gameAuthModeSelect.value = "offline";
       ctx.updateAuthModeUI();
       ctx.showLauncherView("main");

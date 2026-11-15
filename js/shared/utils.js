@@ -35,5 +35,32 @@
     return Number.isFinite(n) ? `${Math.max(0, Math.min(20, Math.round(n)))}/20` : "--/20";
   }
 
-  global.MCShared = { sanitizeVisibleText, formatVital };
+  function showToast(message, type = "info", duration = 3500) {
+    let container = document.getElementById("bao-toast-container");
+    if (!container) {
+      container = document.createElement("div");
+      container.id = "bao-toast-container";
+      container.className = "bao-toast-container";
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement("div");
+    toast.className = `bao-toast ${type}`;
+
+    let iconHtml = "<span>ℹ️</span>";
+    if (type === "success") iconHtml = "<span>✅</span>";
+    else if (type === "error") iconHtml = "<span>⚠️</span>";
+
+    toast.innerHTML = `${iconHtml}<span>${message}</span>`;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add("leaving");
+      setTimeout(() => {
+        toast.remove();
+      }, 250);
+    }, duration);
+  }
+
+  global.MCShared = { sanitizeVisibleText, formatVital, showToast };
 })(window);
