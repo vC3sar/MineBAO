@@ -1,7 +1,9 @@
 {
   "username": "Cachyzz0",
-  "ip": "mc.haliacraft.com",
+  "ip": "jugar.minelatino.net",
   "port": 25565,
   "version": "1.21.11",
-  "mode": "nogui"
+  "mode": "nogui",
+  "autoLoginPassword": "enc:v1:ab37b6c5d697f87746f070f9:42b32ca5aef991ff5704583e7c26bc61:ad49af678e73dfbcf6",
+  "autoCommand": ""
 }

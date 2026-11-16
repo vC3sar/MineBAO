@@ -764,7 +764,7 @@
     }
 
     async function launchBotFromServer(server) {
-      if (!launcherAPI) return;
+      if (!launcherAPI) return startPanelSession();
       window.MCShared?.showToast(`Conectando Bot a ${server.name || server.ip}...`, "info");
       const profile = {
         username: server.username || "Jugador",
@@ -775,10 +775,13 @@
         autoLoginPassword: server.autoLoginPassword || "",
         autoCommand: server.autoCommand || "",
       };
+      setLauncherStatus("Iniciando bot y abriendo panel...");
       const res = await launcherAPI.startNew(profile);
       if (!res?.ok) {
         window.MCShared?.showToast(translateError(res, "launcher.status.saveFailed"), "error");
+        return;
       }
+      startPanelSession();
     }
 
     async function launchGameFromServer(server) {

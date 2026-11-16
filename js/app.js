@@ -74,6 +74,21 @@ const actionBtnRight = $("action-btn-right");
 const actionBtnUse = $("action-btn-use");
 const actionBtnDrop = $("action-btn-drop");
 
+// Elementos del menú lateral desplegable (Drawer / Sidebar)
+const mainContainer = $("container");
+const sidebarEl = $("sidebar");
+const sidebarCloseBtn = $("sidebar-close-btn");
+const sidebarToggleBtn = $("sidebar-toggle-btn");
+const sidebarExpandBtn = $("sidebar-expand-btn");
+const sidebarBackdrop = $("sidebar-backdrop");
+const sessionUptime = $("session-uptime");
+const copyIpBtn = $("copy-ip-btn");
+
+const STORAGE_KEY_SIDEBAR_OPEN = "minebao_sidebar_open";
+let isSidebarOpen = true;
+let uptimeSeconds = 0;
+let uptimeInterval = null;
+
 let socketReconnectAttempt = 0;
 let onActionSelected = null;
 
@@ -217,12 +232,100 @@ function updateReconnectPanel({ visible, busy = false, buttonDisabled = false, b
   if (reconnectAttempt) reconnectAttempt.textContent = attemptText || "";
 }
 
+function formatUptime(totalSecs) {
+  const h = Math.floor(totalSecs / 3600).toString().padStart(2, "0");
+  const m = Math.floor((totalSecs % 3600) / 60).toString().padStart(2, "0");
+  const s = Math.floor(totalSecs % 60).toString().padStart(2, "0");
+  return `${h}:${m}:${s}`;
+}
+
+function startUptimeCounter() {
+  if (uptimeInterval) return;
+  uptimeInterval = setInterval(() => {
+    uptimeSeconds++;
+    if (sessionUptime) sessionUptime.textContent = formatUptime(uptimeSeconds);
+  }, 1000);
+}
+
+function stopUptimeCounter() {
+  if (uptimeInterval) {
+    clearInterval(uptimeInterval);
+    uptimeInterval = null;
+  }
+}
+
+function isMobileLayout() {
+  return window.innerWidth <= 1100;
+}
+
+function setSidebarOpen(open, persist = true) {
+  isSidebarOpen = Boolean(open);
+
+  if (isMobileLayout()) {
+    // En pantallas chicas: comportamiento Drawer offcanvas
+    if (isSidebarOpen) {
+      sidebarEl?.classList.add("drawer-open");
+      sidebarBackdrop?.classList.add("active");
+      sidebarExpandBtn?.classList.add("hidden");
+    } else {
+      sidebarEl?.classList.remove("drawer-open");
+      sidebarBackdrop?.classList.remove("active");
+      sidebarExpandBtn?.classList.remove("hidden");
+    }
+  } else {
+    // En pantallas de escritorio: sidebar colapsable en columna
+    sidebarEl?.classList.remove("drawer-open");
+    sidebarBackdrop?.classList.remove("active");
+    if (isSidebarOpen) {
+      mainContainer?.classList.remove("sidebar-collapsed");
+      sidebarExpandBtn?.classList.add("hidden");
+    } else {
+      mainContainer?.classList.add("sidebar-collapsed");
+      sidebarExpandBtn?.classList.remove("hidden");
+    }
+  }
+
+  if (sidebarCloseBtn) {
+    sidebarCloseBtn.setAttribute("aria-expanded", isSidebarOpen ? "true" : "false");
+  }
+
+  if (persist) {
+    try {
+      localStorage.setItem(STORAGE_KEY_SIDEBAR_OPEN, isSidebarOpen ? "true" : "false");
+    } catch { }
+  }
+}
+
+function toggleSidebar() {
+  setSidebarOpen(!isSidebarOpen);
+}
+
+function initSidebarState() {
+  if (isMobileLayout()) {
+    // En pantallas chicas arranca colapsado como drawer para no tapar consola ni inventario
+    setSidebarOpen(false, false);
+  } else {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_SIDEBAR_OPEN);
+      if (saved === "false") {
+        setSidebarOpen(false, false);
+      } else {
+        setSidebarOpen(true, false);
+      }
+    } catch {
+      setSidebarOpen(true, false);
+    }
+  }
+}
+
 function setBotStatus(status) {
   const s = String(status ?? "offline").toLowerCase();
   sidebarKicker.dataset.status = s === "online" ? "online" : s === "connecting" ? "connecting" : "offline";
   if (s === "online") {
     updateReconnectPanel({ visible: false });
+    startUptimeCounter();
   } else {
+    stopUptimeCounter();
     const connecting = s === "connecting";
     updateReconnectPanel({
       visible: true,
@@ -700,7 +803,18 @@ const WS_HANDLERS = {
     if (data.sessionId && data.sessionId !== currentSessionId) resetChatHistory(data.sessionId, hist);
     else if (data.history) resetChatHistory(data.sessionId ?? currentSessionId, hist);
   },
-  updatePing(data) { $("ping").textContent = `${data.ping} ms`; },
+  updatePing(data) {
+    const pingEl = $("ping");
+    if (!pingEl) return;
+    const val = Number(data.ping);
+    pingEl.textContent = `${data.ping} ms`;
+    pingEl.classList.remove("ping-good", "ping-medium", "ping-bad");
+    if (Number.isFinite(val)) {
+      if (val < 80) pingEl.classList.add("ping-good");
+      else if (val < 180) pingEl.classList.add("ping-medium");
+      else pingEl.classList.add("ping-bad");
+    }
+  },
   vitals(data) { setVitals(data.health, data.food); },
   chat(data) {
     const prefix = data.source === "player" ? "[CHAT]" : data.source === "system" ? "[SYSTEM]" : "[SERVER]";
@@ -819,17 +933,33 @@ input.addEventListener("keydown", (e) => {
 });
 
 // Atajo de teclado: Tecla Q para soltar ítem cuando el cursor está sobre él
+// Atajo de teclado: Ctrl+B para desplegar/colapsar sidebar
 window.addEventListener("keydown", (e) => {
-  if (e.key === "q" || e.key === "Q") {
-    const activeEl = document.activeElement;
-    if (
-      activeEl &&
-      (activeEl.tagName === "INPUT" ||
-        activeEl.tagName === "TEXTAREA" ||
-        activeEl.isContentEditable)
-    ) {
+  const activeEl = document.activeElement;
+  const isInputFocused =
+    activeEl &&
+    (activeEl.tagName === "INPUT" ||
+      activeEl.tagName === "TEXTAREA" ||
+      activeEl.isContentEditable);
+
+  if ((e.ctrlKey || e.metaKey) && (e.key === "b" || e.key === "B")) {
+    if (!isInputFocused) {
+      e.preventDefault();
+      toggleSidebar();
       return;
     }
+  }
+
+  if (e.key === "Escape") {
+    if (isSidebarOpen && (isMobileLayout() || sidebarEl?.classList.contains("drawer-open"))) {
+      e.preventDefault();
+      setSidebarOpen(false);
+      return;
+    }
+  }
+
+  if (e.key === "q" || e.key === "Q") {
+    if (isInputFocused) return;
 
     if (activeHoveredMenuItem && activeHoveredMenuItem.item) {
       e.preventDefault();
@@ -844,6 +974,49 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
+// Listeners del menú lateral desplegable
+sidebarCloseBtn?.addEventListener("click", () => {
+  setSidebarOpen(false);
+});
+
+sidebarToggleBtn?.addEventListener("click", () => {
+  toggleSidebar();
+});
+
+sidebarExpandBtn?.addEventListener("click", () => {
+  setSidebarOpen(true);
+});
+
+sidebarBackdrop?.addEventListener("click", () => {
+  setSidebarOpen(false);
+});
+
+window.addEventListener("resize", () => {
+  setSidebarOpen(isSidebarOpen, false);
+});
+
+copyIpBtn?.addEventListener("click", async () => {
+  const host = $("server")?.textContent?.trim() || "";
+  const port = $("port")?.textContent?.trim() || "";
+  if (!host || host === "-" || host === "...") return;
+
+  const fullAddress = port && port !== "25565" && port !== "-" ? `${host}:${port}` : host;
+  try {
+    await navigator.clipboard.writeText(fullAddress);
+    copyIpBtn.classList.add("copied");
+    const originalTitle = copyIpBtn.title;
+    const copiedMsg = i18n?.t?.("app.sidebar.ipCopied") || "IP copiada al portapapeles";
+    copyIpBtn.title = copiedMsg;
+    window.MCShared?.showToast?.(copiedMsg, "success", 2000);
+    setTimeout(() => {
+      copyIpBtn.classList.remove("copied");
+      copyIpBtn.title = originalTitle;
+    }, 2000);
+  } catch {
+    window.MCShared?.showToast?.(fullAddress, "info", 3000);
+  }
+});
+
 // ── Boot ──────────────────────────────────────────────────────────────────────
 setupLanguage().finally(() => {
   i18n?.subscribe?.(() => rerenderLocalizedUI());
@@ -852,6 +1025,8 @@ setupLanguage().finally(() => {
     rerenderLocalizedUI();
   });
   i18n?.applyTranslations?.(document);
+  initSidebarState();
+  window.lucide?.createIcons?.();
   revealWindowWhenMenuReady();
   connectSocket();
 });

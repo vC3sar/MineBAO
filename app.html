@@ -37,10 +37,16 @@
             class="vital-label" data-i18n="app.vital.health">Vida</span><span class="vital-value" id="hud-health">--/20</span></div>
         <div class="vital-card"><span class="vital-icon" aria-hidden="true">🍗</span><span
             class="vital-label" data-i18n="app.vital.food">Comida</span><span class="vital-value" id="hud-food">--/20</span></div>
-        <button id="end-session-button" type="button" class="hud-end-session-btn" data-i18n-title="app.endSession" title="Terminar partida y volver al menú"
-          data-i18n-aria-label="app.endSession" aria-label="Terminar partida y volver al menú">
-          <i data-lucide="log-out"></i>
-        </button>
+        <div class="hud-actions">
+          <button id="sidebar-toggle-btn" type="button" class="hud-sidebar-btn" data-i18n-title="app.sidebar.toggle"
+            title="Panel de información (Ctrl+B)" data-i18n-aria-label="app.sidebar.toggle" aria-label="Panel de información">
+            <i data-lucide="info"></i>
+          </button>
+          <button id="end-session-button" type="button" class="hud-end-session-btn" data-i18n-title="app.endSession" title="Terminar partida y volver al menú"
+            data-i18n-aria-label="app.endSession" aria-label="Terminar partida y volver al menú">
+            <i data-lucide="log-out"></i>
+          </button>
+        </div>
       </div>
       <div class="chat-filter-bar">
         <input type="text" id="chat-filter-input" placeholder="Filtrar mensajes de chat..." aria-label="Filtrar mensajes de chat">
@@ -61,31 +67,61 @@
       <div class="chat-controls">
         <input type="text" id="input" data-i18n-placeholder="app.input.placeholder" placeholder="Escribe y presiona Enter">
         <button id="inventory-button" type="button" class="btn-inventory-mini" data-i18n-title="app.inventory.title" title="Ver inventario"
-          data-i18n-aria-label="app.inventory.title" aria-label="Ver inventario">🎒</button>
+          data-i18n-aria-label="app.inventory.title" aria-label="Ver inventario">
+          <img src="assets/icons/inventory.png" alt="Inventario" class="inventory-btn-icon">
+        </button>
       </div>
     </div>
 
-    <div id="sidebar">
+    <!-- Pestaña flotante para expandir sidebar cuando está colapsado -->
+    <button id="sidebar-expand-btn" class="sidebar-expand-pill hidden" type="button" 
+      data-i18n-title="app.sidebar.expand" title="Mostrar información (Ctrl+B)" aria-label="Mostrar panel de información">
+      <i data-lucide="info"></i>
+      <span class="expand-pill-status"></span>
+      <span class="expand-pill-label" data-i18n="app.sidebar.info">Información</span>
+    </button>
+
+    <!-- Fondo oscuro backdrop para pantallas chicas -->
+    <div id="sidebar-backdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+
+    <div id="sidebar" role="complementary" aria-label="Panel de información del bot">
       <div class="card sidebar-hero">
-        <div class="sidebar-brand-badge">
-          <img src="assets/logo/MineBAO-icono-256-oscuro.png" alt="MineBAO" class="sidebar-brand-icon">
-          <div class="sidebar-brand-details">
-            <span class="sidebar-brand-title">MineBAO</span>
-            <span class="sidebar-brand-motto">Bot Always Online</span>
+        <div class="sidebar-hero-header">
+          <div class="sidebar-brand-badge">
+            <img src="assets/logo/MineBAO-icono-256-oscuro.png" alt="MineBAO" class="sidebar-brand-icon">
+            <div class="sidebar-brand-details">
+              <span class="sidebar-brand-title">MineBAO</span>
+              <span class="sidebar-brand-motto">Bot Always Online</span>
+            </div>
+          </div>
+          <!-- Botón cerrar menú lateral -->
+          <button type="button" id="sidebar-close-btn" class="sidebar-close-btn" 
+            data-i18n-title="app.sidebar.close" title="Cerrar panel lateral (Esc / Ctrl+B)" aria-label="Cerrar panel lateral">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+
+        <div class="sidebar-status-row">
+          <div class="sidebar-kicker" data-status="offline" data-i18n="app.sidebar.live">Panel en vivo</div>
+          <div class="sidebar-uptime-wrap">
+            <span class="uptime-icon">⏱️</span>
+            <span class="uptime-value" id="session-uptime">00:00:00</span>
           </div>
         </div>
-        <div class="sidebar-kicker" data-status="offline" data-i18n="app.sidebar.live">Panel en vivo</div>
-        <h2 data-i18n="app.sidebar.info">Información</h2>
-        <p data-i18n="app.sidebar.summary">Estado de la sesión, jugador y servidor con lectura rápida.</p>
-        <div class="sidebar-meta"><span class="sidebar-meta-label" data-i18n="app.sidebar.date">Fecha</span><span
-            class="sidebar-meta-value highlight" id="time">--/--/----</span></div>
-        <div class="sidebar-badges"><span class="status-pill" data-i18n="app.sidebar.connected">Conectado</span><span class="status-pill ghost" data-i18n="app.sidebar.offlinePremium">Offline /
-            No premium</span></div>
+
+        <div class="sidebar-meta">
+          <span class="sidebar-meta-label" data-i18n="app.sidebar.date">Fecha</span>
+          <span class="sidebar-meta-value highlight" id="time">--/--/----</span>
+        </div>
+        <div class="sidebar-badges">
+          <span class="status-pill" data-i18n="app.sidebar.connected">Conectado</span>
+          <span class="status-pill ghost" data-i18n="app.sidebar.offlinePremium">Offline / No premium</span>
+        </div>
       </div>
 
       <div class="card">
         <div class="card-head">
-          <div class="card-icon">👤</div>
+          <div class="card-icon"><i data-lucide="user"></i></div>
           <div>
             <h3 data-i18n="app.card.player">Jugador</h3>
             <div class="card-subtitle" data-i18n="app.card.playerIdentity">Identidad de la sesión</div>
@@ -99,23 +135,26 @@
 
       <div class="card">
         <div class="card-head">
-          <div class="card-icon">🌐</div>
+          <div class="card-icon"><i data-lucide="wifi"></i></div>
           <div>
             <h3 data-i18n="app.card.connection">Conexión</h3>
             <div class="card-subtitle" data-i18n="app.card.serverLatency">Latencia del servidor</div>
           </div>
         </div>
-        <div class="card-metric"><span class="metric-label" data-i18n="app.card.ping">Ping</span><span class="metric-value" id="ping">0 ms</span>
+        <div class="card-metric"><span class="metric-label" data-i18n="app.card.ping">Ping</span><span class="metric-value ping-badge" id="ping">0 ms</span>
         </div>
       </div>
 
       <div class="card">
         <div class="card-head">
-          <div class="card-icon">🖥</div>
-          <div>
+          <div class="card-icon"><i data-lucide="server"></i></div>
+          <div style="flex: 1; min-width: 0;">
             <h3 data-i18n="app.card.server">Servidor</h3>
             <div class="card-subtitle" data-i18n="app.card.ipAddress">Dirección IP</div>
           </div>
+          <button type="button" id="copy-ip-btn" class="btn-copy-ip" data-i18n-title="app.sidebar.copyIp" title="Copiar dirección IP" aria-label="Copiar dirección IP">
+            <i data-lucide="copy"></i>
+          </button>
         </div>
         <div class="card-metric"><span class="metric-label" data-i18n="app.card.host">Host</span><span class="metric-value" id="server">-</span>
         </div>
